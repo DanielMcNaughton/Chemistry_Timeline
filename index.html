@@ -312,20 +312,14 @@ dialog form{display:flex;flex-direction:column;gap:14px}
   .bar{padding:0 12px}
   .bar .primary{padding:8px 12px}
 }
-/* ---------- Enlarged scheme ---------- */
+/* ---------- Enlarged scheme (pop-up about 3x the size) ---------- */
 img[data-zoom]{cursor:zoom-in}
-#lightbox{width:96vw;max-width:96vw;height:92vh;max-height:92vh;margin:auto;padding:0;overflow:hidden;background:#fff;color:#000;border-radius:22px;display:none;flex-direction:column}
-#lightbox[open]{display:flex}
-#lightbox::backdrop{background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.lb-bar{display:flex;align-items:center;gap:14px;padding:12px 14px 12px 22px;border-bottom:.5px solid rgba(60,60,67,.18);flex:0 0 auto}
-.lb-title{font:700 20px/1.1 var(--font-display);letter-spacing:-.02em}
-.lb-hint{flex:1;font-size:13px;color:rgba(60,60,67,.6)}
-#lightbox .round{background:rgba(118,118,128,.12);color:#000}
-.lb-stage{flex:1 1 auto;min-height:0;overflow:auto;display:grid;place-items:center;padding:20px}
-.lb-stage img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}
-.lb-stage.zoomed{place-items:start}
-.lb-stage.zoomed img{max-width:none;max-height:none;cursor:zoom-out}
-.lb-stage.fixed img{cursor:default}
+#lightbox{width:fit-content;max-width:94vw;max-height:90vh;padding:10px 14px 16px;background:#fff;color:#000;border-radius:20px;overflow:auto}
+#lightbox::backdrop{background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.lb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.lb-title{font:650 16px/1.1 var(--font-display);letter-spacing:-.01em;padding-left:4px}
+#lightbox .round{width:30px;height:30px;font-size:14px;background:rgba(118,118,128,.12);color:#000}
+#lbImg{display:block;height:auto;cursor:zoom-out}
 
 /* ---------- Weekly summary ---------- */
 .pillbtn{border-radius:999px;position:relative;white-space:nowrap}
@@ -454,12 +448,8 @@ dialog.week{width:min(880px,calc(100vw - 24px))}
 
 <!-- Enlarged scheme -->
 <dialog id="lightbox" aria-label="Enlarged scheme">
-  <div class="lb-bar">
-    <span class="lb-title" id="lbTitle"></span>
-    <span class="lb-hint" id="lbHint"></span>
-    <button class="round" id="lbClose" aria-label="Close">✕</button>
-  </div>
-  <div class="lb-stage" id="lbStage"><img id="lbImg" alt=""></div>
+  <div class="lb-bar"><span class="lb-title" id="lbTitle"></span><button class="round" id="lbClose" aria-label="Close">✕</button></div>
+  <img id="lbImg" alt="">
 </dialog>
 
 <!-- Menu -->
@@ -1092,44 +1082,28 @@ $("#wkClose").onclick = () => $("#weekDialog").close();
 $("#wkCopy").onclick = async () => toast(await copyText(weekText()) ? "Summary copied. Paste it into your slides or notes." : "Couldn't copy. Try Print or save as PDF instead.");
 $("#wkPrint").onclick = () => window.print();
 
-/* ---------- Click any scheme to enlarge it ---------- */
-const lb = $("#lightbox"), lbStage = $("#lbStage"), lbImg = $("#lbImg");
-function lbFit(){
-  lbStage.classList.remove("zoomed");
-  // Only offer zoom when the full-size image is bigger than what fits on screen.
-  requestAnimationFrame(() => {
-    const canZoom = lbImg.naturalWidth > lbImg.clientWidth + 4 || lbImg.naturalHeight > lbImg.clientHeight + 4;
-    lbStage.classList.toggle("fixed", !canZoom);
-    $("#lbHint").textContent = canZoom ? "Click the image to see it full size. Esc to close." : "Esc or click outside to close.";
-  });
-}
-function openLightbox(src, title){
-  lbImg.src = src; $("#lbTitle").textContent = title || "Scheme";
+/* ---------- Click any scheme to see it about 3x bigger ---------- */
+const lb = $("#lightbox"), lbImg = $("#lbImg");
+function openLightbox(img){
+  // 3x the size it's shown at (small thumbnails are treated as the editor's scheme width), kept on screen.
+  const base = Math.max(img.getBoundingClientRect().width, 330);
+  const maxW = window.innerWidth * 0.94 - 28, maxH = window.innerHeight * 0.9 - 70;
+  const ratio = img.naturalHeight / img.naturalWidth || 0.3;
+  let w = Math.min(base * 3, maxW);
+  if (w * ratio > maxH) w = maxH / ratio;
+  lbImg.src = img.src; lbImg.style.width = Math.round(w) + "px";
+  $("#lbTitle").textContent = img.dataset.zoom || "Scheme";
   lb.showModal();
-  if (lbImg.complete) lbFit(); else lbImg.onload = lbFit;
 }
 document.addEventListener("click", e => {
   const img = e.target.closest?.("img[data-zoom]");
   if (!img || drag?.active) return;
   e.preventDefault(); e.stopPropagation();
-  openLightbox(img.src, img.dataset.zoom);
+  openLightbox(img);
 }, true);
-lbImg.addEventListener("click", e => {
-  if (lbStage.classList.contains("fixed")) return;
-  const zoomed = !lbStage.classList.contains("zoomed");
-  // Zoom in around the point you clicked.
-  const r = lbImg.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
-  lbStage.classList.toggle("zoomed", zoomed);
-  if (zoomed) {
-    lbStage.scrollLeft = fx * lbImg.naturalWidth - lbStage.clientWidth / 2;
-    lbStage.scrollTop = fy * lbImg.naturalHeight - lbStage.clientHeight / 2;
-  }
-  $("#lbHint").textContent = zoomed ? "Scroll to move around. Click to fit the screen again." : "Click the image to see it full size. Esc to close.";
-});
 $("#lbClose").onclick = () => lb.close();
-lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });   // click on the dimmed background
-lbStage.addEventListener("click", e => { if (e.target === lbStage) lb.close(); });
-window.addEventListener("resize", () => { if (lb.open && !lbStage.classList.contains("zoomed")) lbFit(); });
+lbImg.onclick = () => lb.close();
+lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });
 
 function pin(id){
   selectedId = id; hoverId = null; cardKey = "";
