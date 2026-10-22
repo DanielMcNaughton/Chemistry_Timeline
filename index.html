@@ -120,6 +120,7 @@ body.wide{overflow:hidden}
 .tl-grid,.tl-lanes{position:absolute;left:0;right:0;pointer-events:none}
 .tl-lanes{top:0;bottom:0}
 .slot{position:absolute;left:0;right:0;z-index:2;cursor:copy}
+.lane-col{position:absolute;top:0;bottom:0;z-index:1}
 .tl-now{position:absolute;left:-6px;right:0;height:0;border-top:2px solid var(--now);z-index:6;pointer-events:none}
 .tl-now::before{content:"";position:absolute;left:0;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--now)}
 .tl-now b{position:absolute;right:calc(100% + 4px);top:-8px;color:var(--now);font:600 12px/1 var(--font);font-variant-numeric:tabular-nums;background:var(--surface);padding:2px 4px;border-radius:4px}
@@ -219,8 +220,7 @@ body.is-resizing,body.is-resizing *{cursor:ns-resize !important}
 .g-col textarea{background:transparent;padding:2px 0;border-radius:0;min-height:40px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{padding:7px 12px;font-size:14px;border-radius:999px}
-.chips.types button[aria-pressed="true"]{background:var(--edge);color:#fff}
-.chips.types button[data-type="other"][aria-pressed="true"]{background:#8E8E93}
+.chips.types button[aria-pressed="true"]{background:var(--text);color:var(--surface)}
 .chips.dur button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .chips.small button{font-size:13px;padding:6px 10px}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px;border-radius:10px;background:var(--fill);margin-top:10px}
@@ -244,6 +244,8 @@ body.is-resizing,body.is-resizing *{cursor:ns-resize !important}
 [hidden]{display:none !important}
 .blk[data-type="other"]{background:repeating-linear-gradient(135deg, color-mix(in srgb, var(--edge) 13%, var(--surface)) 0 7px, color-mix(in srgb, var(--edge) 24%, var(--surface)) 7px 14px)}
 .rep{margin-left:5px;font-weight:600;opacity:.75}
+.tag{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;font:600 10.5px/1 var(--font);letter-spacing:0;vertical-align:2px;background:color-mix(in srgb, var(--edge) 24%, transparent);color:color-mix(in srgb, var(--edge) 55%, var(--text))}
+.rr-sub .tag{margin-left:0;margin-right:2px}
 .swatches{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .sw{width:26px;height:26px;padding:0;border-radius:50%;background:var(--edge)}
 .sw:hover{background:var(--edge);transform:scale(1.08)}
@@ -282,6 +284,7 @@ body.is-resizing,body.is-resizing *{cursor:ns-resize !important}
    Dialogs & toast
    ========================================================= */
 dialog{border:0;border-radius:22px;background:var(--surface);color:var(--text);padding:22px;width:min(470px,calc(100vw - 24px));max-height:calc(100dvh - 40px);box-shadow:0 30px 80px rgba(0,0,0,.3)}
+#newDialog{margin:5vh auto auto}  /* top-anchored so the form doesn't jump when a scheme is attached */
 dialog::backdrop{background:rgba(0,0,0,.32);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 dialog h2{font:700 24px/1.1 var(--font-display);letter-spacing:-.02em;margin:0 0 16px}
 dialog form{display:flex;flex-direction:column;gap:14px}
@@ -309,6 +312,54 @@ dialog form{display:flex;flex-direction:column;gap:14px}
   .bar{padding:0 12px}
   .bar .primary{padding:8px 12px}
 }
+/* ---------- Weekly summary ---------- */
+.pillbtn{border-radius:999px;position:relative;white-space:nowrap}
+.pillbtn.ready::after{content:"";position:absolute;top:2px;right:2px;width:9px;height:9px;border-radius:50%;background:var(--now);box-shadow:0 0 0 2px var(--bg)}
+dialog.week{width:min(880px,calc(100vw - 24px))}
+.week-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.week-head h2{margin:0 0 4px}
+.week-head .note{margin:0;font-size:15px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.stat{background:var(--surface-2);border-radius:16px;padding:12px 14px}
+.stat b{display:block;font:300 36px/1.05 var(--font-round);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat span{font-size:13px;color:var(--muted)}
+.stat.ok b{color:var(--ok)} .stat.fail b{color:var(--fail)}
+.wk-sec h3{font:600 13px/1.2 var(--font);color:var(--muted);margin:22px 2px 8px}
+.wk-list{display:flex;flex-direction:column;gap:8px}
+.wk-rx{display:grid;grid-template-columns:128px minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 14px 10px 10px;border-radius:14px;background:var(--surface-2);border-left:5px solid var(--edge)}
+.wk-scheme{width:128px;height:60px;background:#fff;border-radius:10px;display:grid;place-items:center;overflow:hidden;box-shadow:0 0 0 .5px var(--sep)}
+.wk-scheme img{max-width:100%;max-height:100%}
+.wk-scheme.none{background:transparent;box-shadow:none}
+.wk-code{font:650 16px/1.2 var(--font-display)}
+.wk-meta{font-size:13px;color:var(--muted);margin-top:2px}
+.wk-out{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.chip{font:600 12.5px/1 var(--font);padding:6px 9px;border-radius:999px;white-space:nowrap}
+.chip.ok{background:color-mix(in srgb, var(--ok) 16%, transparent);color:var(--ok)}
+.chip.fail{background:color-mix(in srgb, var(--fail) 16%, transparent);color:var(--fail)}
+.chip.pend{background:var(--fill);color:var(--muted)}
+.wk-simple{list-style:none;margin:0;padding:0;background:var(--surface-2);border-radius:14px}
+.wk-simple li{padding:10px 14px;display:flex;justify-content:space-between;gap:12px}
+.wk-simple li+li{border-top:.5px solid var(--sep)}
+.wk-simple .wk-meta{margin:0;text-align:right}
+.wk-empty{color:var(--muted);padding:18px 4px}
+@media (max-width: 900px){
+  .wide-only{display:none}
+  .wk-rx{grid-template-columns:minmax(0,1fr) auto}
+  .wk-scheme{display:none}
+}
+@page{margin:14mm}
+@media print{
+  html:root:root{color-scheme:light;--bg:#fff;--surface:#fff;--surface-2:#F4F4F7;--fill:rgba(0,0,0,.06);--sep:rgba(0,0,0,.14);--text:#000;--muted:#555;--ok:#1E8E3E;--fail:#D93025}
+  body{background:#fff;color:#000}
+  #weekDialog{background:#fff;color:#000;padding:0 2px !important}
+  body.wide{overflow:visible}
+  body > :not(#weekDialog){display:none !important}
+  #weekDialog{position:static;display:block;box-shadow:none;max-height:none;width:auto;margin:0;padding:0}
+  #weekDialog::backdrop{display:none}
+  .no-print{display:none !important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wk-rx{break-inside:avoid}
+}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{transition:none !important}
 }
@@ -324,6 +375,7 @@ dialog form{display:flex;flex-direction:column;gap:14px}
     <h1 id="dayLabel"></h1>
   </nav>
   <div class="spacer"></div>
+  <button id="weekBtn" class="pillbtn"><span class="wide-only">Week </span>summary</button>
   <button class="primary" id="newBtn">New entry</button>
   <button class="round more" id="menuBtn" aria-label="Menu">⋯</button>
 </header>
@@ -373,6 +425,16 @@ dialog form{display:flex;flex-direction:column;gap:14px}
       <button type="submit" class="primary">Add to timeline</button>
     </div>
   </form>
+</dialog>
+
+<!-- Weekly summary -->
+<dialog id="weekDialog" class="week">
+  <div class="week-head">
+    <div><h2 id="wkTitle">Week summary</h2><p class="note" id="wkRange"></p></div>
+    <div class="row no-print"><button class="round" id="wkPrev" aria-label="Previous week">‹</button><button class="round" id="wkNext" aria-label="Next week">›</button></div>
+  </div>
+  <div id="wkBody"></div>
+  <div class="dlg-foot no-print"><button id="wkCopy">Copy as text</button><button id="wkPrint">Print or save as PDF</button><button class="primary" id="wkClose">Done</button></div>
 </dialog>
 
 <!-- Menu -->
@@ -436,7 +498,19 @@ const Store = (() => {
 
 /* ================= Constants & helpers ================= */
 const MIN = 60000, HOUR = 60 * MIN;
-const TYPES = { reaction: "Reaction", workup: "Workup", column: "Column", other: "Meeting / other" };
+const TYPES = { reaction: "Reaction", workup: "Workup", column: "Column", workupcolumn: "Workup + column", other: "Meeting / other" };
+const TAGS = { reaction: "Reaction", workup: "Workup", column: "Column", workupcolumn: "Workup + column", other: "Meeting" };
+const TYPE_CHIPS = [["reaction", "Reaction"], ["workup", "Workup"], ["column", "Column"], ["other", "Meeting / other"]];
+// Workup and Column can both be ticked, which makes a "Workup + column" entry.
+const typePressed = (cur, k) => cur === k || (cur === "workupcolumn" && (k === "workup" || k === "column"));
+function toggleType(cur, k){
+  if (k !== "workup" && k !== "column") return k;
+  const has = new Set(cur === "workupcolumn" ? ["workup", "column"] : (cur === "workup" || cur === "column") ? [cur] : []);
+  if (has.has(k)) { if (has.size > 1) has.delete(k); } else has.add(k);
+  return has.size === 2 ? "workupcolumn" : [...has][0];
+}
+const coloured = i => i.type !== "other";
+const tag = i => `<span class="tag">${TAGS[i.type]}</span>`;
 const RAIN = 10;   // rainbow colours --r0 … --r9
 const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const SERIES_WEEKS = 12;   // how far ahead weekly repeats are filled in
@@ -493,12 +567,12 @@ const flatMQ = matchMedia("(max-width: 900px)");
 const isFlat = () => flatMQ.matches;
 const isRunning = (i, now = Date.now()) => i.start <= now && i.end > now;
 const hasColor = i => Number.isInteger(i.color);
-function edgeOf(i){ return i.type === "reaction" ? `var(--r${hasColor(i) ? i.color : 1})` : `var(--c-${i.type})`; }
+function edgeOf(i){ return coloured(i) ? `var(--r${hasColor(i) ? i.color : 1})` : "var(--c-other)"; }
 const paint = i => `data-type="${i.type}" style="--edge:${edgeOf(i)}"`;
 // New reactions get the next rainbow colour that isn't in use; a repeat of the same code keeps its colour.
 function nextColor(code){
   const c = (code || "").trim().toLowerCase();
-  const rx = items.filter(i => i.type === "reaction" && hasColor(i));
+  const rx = items.filter(i => coloured(i) && hasColor(i));
   const same = rx.filter(i => i.code.trim().toLowerCase() === c).sort((a,b) => (b.created||0) - (a.created||0))[0];
   if (same) return same.color;
   const last = rx.slice().sort((a,b) => (b.created||0) - (a.created||0))[0];
@@ -516,7 +590,7 @@ let items = [];
 let viewDay = startOfDay(Date.now());
 let selectedId = null;      // entry pinned in the card for editing
 let hoverId = null;         // entry previewed in the card while hovered
-let drag = null, suppressClick = false;
+let drag = null, suppressClick = false, curLaneW = MIN_LANE_W;
 const byId = id => items.find(i => i.id === id);
 const saveTimers = {};
 function save(item, now = false){
@@ -574,13 +648,14 @@ function renderPlane(){
     const y1 = yOf(minuteOfDay(i.start, day, next));
     return { i, y1, y2: Math.max(yOf(minuteOfDay(i.end, day, next)), y1 + 26) };
   }).sort((a, b) => a.y1 - b.y1 || b.y2 - a.y2);
-  const lanes = [];
-  for (const r of rows) {
-    let k = lanes.findIndex(end => end <= r.y1 + 0.5);
-    if (k < 0) { k = lanes.length; lanes.push(0); }
-    lanes[k] = r.y2; r.lane = k;
-  }
-  const laneCount = Math.max(lanes.length + 1, 4);
+  // Lanes: entries you've dragged into a lane keep it (latest move wins a clash); the rest fill in automatically.
+  const occ = [];
+  const fits = (k, r) => !(occ[k] || []).some(([a, b]) => r.y1 < b - 0.5 && a < r.y2 - 0.5);
+  const put = (k, r) => { (occ[k] ||= []).push([r.y1, r.y2]); r.lane = k; };
+  rows.filter(r => Number.isInteger(r.i.lane)).sort((a, b) => (b.i.laneAt || 0) - (a.i.laneAt || 0))
+      .forEach(r => { if (fits(r.i.lane, r)) put(r.i.lane, r); });
+  rows.filter(r => r.lane == null).forEach(r => { let k = 0; while (!fits(k, r)) k++; put(k, r); });
+  const laneCount = Math.max(occ.length + 1, 4);
 
   // Size the plane so that, once tilted, its far edge lands near the right side of the stage.
   const S = stage.clientWidth - 16;
@@ -603,20 +678,23 @@ function renderPlane(){
   const laneLines = `<div class="tl-lanes" style="background:repeating-linear-gradient(to right, var(--sep) 0 .5px, transparent .5px ${laneW}px)"></div>`;
 
   // Invisible 15-minute slots: used for clicking to add, and for working out times while dragging on the tilted plane.
+  curLaneW = laneW;
+  let laneCols = "";
+  for (let k = 0; k < laneCount; k++) laneCols += `<div class="lane-col" data-lane="${k}" style="left:${k * laneW}px;width:${laneW}px"></div>`;
   let slots = "";
   for (let m = 0; m < 1440; m += SNAP) slots += `<div class="slot" data-m="${m}" style="top:${yOf(m)}px;height:${yOf(m+SNAP)-yOf(m)}px"></div>`;
 
   const blocks = rows.map(({ i, y1, y2, lane }) => {
     const h = y2 - y1, before = i.start < day, after = i.end > next;
-    let inner = `<span class="code">${esc(i.code)}${i.seriesId ? `<span class="rep" title="Repeats weekly">↻</span>` : ""}</span>`;
-    if (h >= 42) inner += `<span class="lbl">${esc(i.label || TYPES[i.type])}</span>`;
+    let inner = `<span class="code">${esc(i.code)}${i.seriesId ? `<span class="rep" title="Repeats weekly">↻</span>` : ""}${tag(i)}</span>`;
+    if (h >= 42 && i.label) inner += `<span class="lbl">${esc(i.label)}</span>`;
     if (h >= 60) inner += `<span class="tm">${before ? fmtWhen(i.start) : fmtTime(i.start)} – ${after ? fmtWhen(i.end) : fmtTime(i.end)}</span>`;
     else if (h >= 48 && (before || after)) inner += `<span class="cont">${before ? "from " + fmtWhen(i.start) : "until " + fmtWhen(i.end)}</span>`;
     const badge = i.outcome === "ok" ? `<span class="badge ok" aria-label="Worked">✓</span>` : i.outcome === "fail" ? `<span class="badge fail" aria-label="Failed">✗</span>` : "";
     const grip = after ? "" : `<span class="grip" aria-hidden="true"></span>`;
     const cls = ["blk", isRunning(i, now) && "running", i.id === selectedId && "sel", i.id === hoverId && "hover"].filter(Boolean).join(" ");
-    return `<div class="${cls}" data-type="${i.type}" data-id="${i.id}" tabindex="0" role="button"
-      aria-label="${esc(i.code)}, ${fmtTime(i.start)} to ${fmtTime(i.end)}. Arrow keys move it, Shift + arrow keys change the end time."
+    return `<div class="${cls}" data-type="${i.type}" data-id="${i.id}" data-lane="${lane}" tabindex="0" role="button"
+      aria-label="${esc(i.code)}, ${fmtTime(i.start)} to ${fmtTime(i.end)}. Up and down arrows move it in time, left and right change lane, Shift + up or down changes the end time."
       style="--edge:${edgeOf(i)};top:${y1+1}px;height:${h-2}px;left:${lane*laneW+4}px;width:${laneW-8}px">${inner}${badge}${grip}</div>`;
   }).join("");
 
@@ -625,7 +703,7 @@ function renderPlane(){
   plane.style.width = (GUTTER + bodyW) + "px";
   plane.innerHTML = `<div class="tl" style="height:${TOTAL_H}px">
       <div class="tl-gutter">${gutter}</div>
-      <div class="tl-body" id="tlBody">${bands}${grid}${laneLines}${slots}${blocks}${nowLine}</div>
+      <div class="tl-body" id="tlBody">${bands}${grid}${laneLines}${laneCols}${slots}${blocks}${nowLine}</div>
     </div>`;
 }
 function scrollToFocus(){
@@ -674,7 +752,7 @@ function renderHome(){
     if (running.length) html += `<div class="run-list">` + running.map(i => `
       <button class="run-row" ${paint(i)} data-open="${i.id}">
         ${thumb(i)}
-        <span style="min-width:0"><span class="rr-code">${esc(i.code)}</span><span class="rr-sub">${esc(i.label || TYPES[i.type])}</span></span>
+        <span style="min-width:0"><span class="rr-code">${esc(i.code)}</span><span class="rr-sub">${tag(i)} ${esc(i.label)}</span></span>
         <span class="rr-time"><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span></span>
         <span class="bar-track"><i data-bar="${i.id}"></i></span>
       </button>`).join("") + `</div>`;
@@ -710,11 +788,11 @@ function renderPreview(i){
     ${isRunning(i, now) ? `<div class="pv-live" ${paint(i)}><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span><div class="bar-track"><i data-bar="${i.id}"></i></div></div>` : ""}
     ${i.conditions ? `<div class="pv-text"><h4>Conditions</h4><p>${esc(i.conditions)}</p></div>` : ""}
     ${i.notes ? `<div class="pv-text"><h4>Notes</h4><p>${esc(i.notes)}</p></div>` : ""}
-    <p class="hint">Click the block to edit it. Drag to move it, or drag its bottom edge to change the length.</p>`;
+    <p class="hint">Click the block to edit it. Drag it up or down to change the time, sideways to change lane, or drag its bottom edge to change the length.</p>`;
 }
 function renderEditor(i){
   setGlow(i);
-  const typeChips = Object.entries(TYPES).map(([k, v]) => `<button data-type="${k}" aria-pressed="${i.type === k}">${v}</button>`).join("");
+  const typeChips = TYPE_CHIPS.map(([k, v]) => `<button data-type="${k}" aria-pressed="${typePressed(i.type, k)}">${v}</button>`).join("");
   const seg = [["pending","Pending"],["ok","✓ Worked"],["fail","✗ Failed"]].map(([v,l]) => `<button data-v="${v}" aria-pressed="${i.outcome === v}">${l}</button>`).join("");
   const live = isRunning(i) ? `<div class="pv-live" ${paint(i)}><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span><div class="bar-track"><i data-bar="${i.id}"></i></div></div>` : "";
   card.innerHTML = `
@@ -722,7 +800,7 @@ function renderEditor(i){
     <input class="title-input" id="pCode" value="${esc(i.code)}" aria-label="Code" autocomplete="off">
     <input class="sub-input" id="pLabel" value="${esc(i.label)}" placeholder="Add a description" aria-label="Description" autocomplete="off">
     <div class="chips types" id="pType">${typeChips}</div>
-    ${i.type === "reaction" ? `<div class="swatches" id="pColor" aria-label="Colour">${Array.from({length: RAIN}, (_, k) => `<button class="sw" style="--edge:var(--r${k})" data-c="${k}" aria-pressed="${i.color === k}" aria-label="Colour ${k + 1}"></button>`).join("")}</div>` : ""}
+    ${coloured(i) ? `<div class="swatches" id="pColor" aria-label="Colour">${Array.from({length: RAIN}, (_, k) => `<button class="sw" style="--edge:var(--r${k})" data-c="${k}" aria-pressed="${i.color === k}" aria-label="Colour ${k + 1}"></button>`).join("")}</div>` : ""}
     ${i.type === "other" ? "" : `<div class="seg" id="pOutcome" aria-label="Result">${seg}</div>`}
     ${live}
     <div class="group">
@@ -754,7 +832,7 @@ function renderEditor(i){
   $("#pCond").oninput = e => upd(x => x.conditions = e.target.value);
   $("#pNotes").oninput = e => upd(x => x.notes = e.target.value);
   const redo = () => { cardKey = ""; renderCard(true); };
-  $("#pType").onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => { x.type = b.dataset.type; if (x.type === "reaction" && !hasColor(x)) x.color = nextColor(x.code); }, { now: true }); redo(); } };
+  $("#pType").onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => { x.type = toggleType(x.type, b.dataset.type); if (coloured(x) && !hasColor(x)) x.color = nextColor(x.code); }, { now: true }); redo(); } };
   const pc = $("#pColor"); if (pc) pc.onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => x.color = Number(b.dataset.c), { now: true }); redo(); } };
   const po = $("#pOutcome"); if (po) po.onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => x.outcome = b.dataset.v, { now: true }); redo(); } };
   $("#pHours").onchange = e => { const h = parseFloat(e.target.value); if (h > 0) { upd(x => x.end = x.start + Math.round(h * 60) * MIN, { now: true }); redo(); } };
@@ -796,7 +874,7 @@ function topUpSeries(s){
     const st = atMinute(day, s.startMin);
     const it = { id: uid(), code: s.code, label: s.label, type: s.type, start: st, end: st + s.durMin * MIN, outcome: "pending",
                  scheme: s.scheme || null, conditions: "", notes: "", created: Date.now(), seriesId: s.id };
-    if (s.type === "reaction") it.color = s.color;
+    if (s.type !== "other") it.color = s.color;
     items.push(it); Store.put(it); made.push(it);
     s.generatedUntil = day; day = addDays(day, 7);
   }
@@ -887,6 +965,108 @@ $("#todoClear").onclick = () => {
   todos = todos.filter(t => !t.done); renderTodos();
 };
 
+/* ---------- Weekly summary (research week = Friday to Thursday) ---------- */
+let wkOffset = 0;
+function weekRange(offset){
+  const today = startOfDay(Date.now()), dow = new Date(today).getDay();
+  let thu = dow === 5 ? addDays(today, -1) : addDays(today, (4 - dow + 7) % 7);   // on Friday, show the week that just ended
+  thu = addDays(thu, -7 * offset);
+  return { start: addDays(thu, -6), end: addDays(thu, 1) };
+}
+function fmtRange(r){
+  const o = { weekday: "short", day: "numeric", month: "short" };
+  return `${new Date(r.start).toLocaleDateString("en-AU", o)} to ${new Date(addDays(r.end, -1)).toLocaleDateString("en-AU", o)}`;
+}
+function weekData(r){
+  const inWeek = items.filter(i => i.start >= r.start && i.start < r.end && i.type !== "other").sort((a, b) => a.start - b.start);
+  const rx = inWeek.filter(i => i.type === "reaction");
+  const groups = [];
+  for (const i of rx) {
+    const k = i.code.trim().toLowerCase();
+    let g = groups.find(x => x.key === k);
+    if (!g) groups.push(g = { key: k, runs: [] });
+    g.runs.push(i);
+  }
+  const other = inWeek.filter(i => i.type !== "reaction");
+  const tasks = todos.filter(t => t.done && t.doneAt >= r.start && t.doneAt < r.end).sort((a, b) => a.doneAt - b.doneAt);
+  const now = Date.now();
+  return {
+    rx, groups, other, tasks,
+    ok: rx.filter(i => i.outcome === "ok").length,
+    fail: rx.filter(i => i.outcome === "fail").length,
+    open: rx.filter(i => i.outcome === "pending").length,
+    running: rx.filter(i => isRunning(i, now)).length
+  };
+}
+const dayNames = runs => [...new Set(runs.map(i => new Date(i.start).toLocaleDateString("en-AU", { weekday: "short" })))].join(", ");
+function outcomeChips(runs){
+  const ok = runs.filter(i => i.outcome === "ok").length, fail = runs.filter(i => i.outcome === "fail").length, pend = runs.length - ok - fail;
+  return [ok && `<span class="chip ok">✓ ${ok} worked</span>`, fail && `<span class="chip fail">✗ ${fail} failed</span>`, pend && `<span class="chip pend">${pend} no result yet</span>`].filter(Boolean).join("");
+}
+function renderWeek(){
+  const r = weekRange(wkOffset), d = weekData(r);
+  $("#wkTitle").textContent = wkOffset === 0 ? "This week" : wkOffset === 1 ? "Last week" : "Week summary";
+  $("#wkRange").textContent = fmtRange(r);
+  $("#wkNext").disabled = wkOffset === 0;
+  if (!d.rx.length && !d.other.length && !d.tasks.length) { $("#wkBody").innerHTML = `<p class="wk-empty">Nothing logged for this week.</p>`; return; }
+  let html = `<div class="stats">
+      <div class="stat"><b>${d.rx.length}</b><span>reactions run</span></div>
+      <div class="stat ok"><b>${d.ok}</b><span>worked</span></div>
+      <div class="stat fail"><b>${d.fail}</b><span>failed</span></div>
+      <div class="stat"><b>${d.open}</b><span>${d.running ? `no result yet (${d.running} running)` : "no result yet"}</span></div>
+      <div class="stat"><b>${d.other.length}</b><span>workups and columns</span></div>
+      <div class="stat"><b>${d.tasks.length}</b><span>tasks done</span></div>
+    </div>`;
+  if (d.groups.length) html += `<section class="wk-sec"><h3>Reactions</h3><div class="wk-list">` + d.groups.map(g => {
+      const last = g.runs[g.runs.length - 1], scheme = g.runs.slice().reverse().find(i => i.scheme)?.scheme;
+      const label = g.runs.map(i => i.label).filter(Boolean).pop() || "";
+      const cond = g.runs.map(i => i.conditions).filter(Boolean).pop() || "";
+      return `<div class="wk-rx" style="--edge:${edgeOf(last)}">
+        <div class="wk-scheme ${scheme ? "" : "none"}">${scheme ? `<img src="${scheme}" alt="">` : ""}</div>
+        <div style="min-width:0"><div class="wk-code">${esc(last.code)}${label ? ` <span style="font-weight:400;color:var(--muted)">${esc(label)}</span>` : ""}</div>
+          <div class="wk-meta">${g.runs.length > 1 ? `${g.runs.length} runs` : "1 run"}, ${dayNames(g.runs)}${cond ? `. ${esc(cond)}` : ""}</div></div>
+        <div class="wk-out">${outcomeChips(g.runs)}</div>
+      </div>`;
+    }).join("") + `</div></section>`;
+  if (d.other.length) html += `<section class="wk-sec"><h3>Workups and columns</h3><ul class="wk-simple">` + d.other.map(i =>
+      `<li><span style="--edge:${edgeOf(i)}"><b>${esc(i.code)}</b>${tag(i)} ${esc(i.label)}</span><span class="wk-meta">${new Date(i.start).toLocaleDateString("en-AU", { weekday: "short" })}</span></li>`).join("") + `</ul></section>`;
+  if (d.tasks.length) html += `<section class="wk-sec"><h3>Tasks done</h3><ul class="wk-simple">` + d.tasks.map(t =>
+      `<li><span>${esc(t.text)}</span><span class="wk-meta">${new Date(t.doneAt).toLocaleDateString("en-AU", { weekday: "short" })}</span></li>`).join("") + `</ul></section>`;
+  $("#wkBody").innerHTML = html;
+}
+function weekText(){
+  const r = weekRange(wkOffset), d = weekData(r);
+  const out = [`Week summary: ${fmtRange(r)}`, `Reactions: ${d.rx.length} run, ${d.ok} worked, ${d.fail} failed, ${d.open} with no result yet`, ""];
+  for (const g of d.groups) {
+    const last = g.runs[g.runs.length - 1];
+    const label = g.runs.map(i => i.label).filter(Boolean).pop() || "", cond = g.runs.map(i => i.conditions).filter(Boolean).pop() || "";
+    const ok = g.runs.filter(i => i.outcome === "ok").length, fail = g.runs.filter(i => i.outcome === "fail").length, pend = g.runs.length - ok - fail;
+    const res = [ok && `${ok} worked`, fail && `${fail} failed`, pend && `${pend} no result yet`].filter(Boolean).join(", ");
+    out.push(`- ${last.code}${label ? ` (${label})` : ""}: ${g.runs.length} run${g.runs.length > 1 ? "s" : ""}, ${res}`);
+    if (cond) out.push(`    ${cond}`);
+  }
+  if (d.other.length) { out.push("", "Workups and columns:"); d.other.forEach(i => out.push(`- ${i.code} (${TAGS[i.type].toLowerCase()})${i.label ? ": " + i.label : ""}`)); }
+  if (d.tasks.length) { out.push("", "Tasks done:"); d.tasks.forEach(t => out.push(`- ${t.text}`)); }
+  return out.join("\n");
+}
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch {
+    const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch {} ta.remove(); return ok;
+  }
+}
+function summaryReady(){
+  const d = new Date(), dow = d.getDay(), h = d.getHours();
+  return (dow === 4 && h >= 12) || (dow === 5 && h < 12);
+}
+$("#weekBtn").onclick = () => { wkOffset = 0; renderWeek(); $("#weekDialog").showModal(); };
+$("#wkPrev").onclick = () => { wkOffset++; renderWeek(); };
+$("#wkNext").onclick = () => { wkOffset = Math.max(0, wkOffset - 1); renderWeek(); };
+$("#wkClose").onclick = () => $("#weekDialog").close();
+$("#wkCopy").onclick = async () => toast(await copyText(weekText()) ? "Summary copied. Paste it into your slides or notes." : "Couldn't copy. Try Print or save as PDF instead.");
+$("#wkPrint").onclick = () => window.print();
+
 function pin(id){
   selectedId = id; hoverId = null; cardKey = "";
   renderCard(true); renderPlane();
@@ -930,6 +1110,10 @@ plane.addEventListener("pointerout", e => {
 });
 
 /* ================= Click, keys and drag on the plane ================= */
+function laneAt(x, y){
+  const el = document.elementsFromPoint(x, y).find(n => n.classList?.contains("lane-col"));
+  return el ? Number(el.dataset.lane) : null;
+}
 function slotAt(x, y){
   const el = document.elementsFromPoint(x, y).find(n => n.classList?.contains("slot"));
   return el ? Number(el.dataset.m) : null;
@@ -945,6 +1129,14 @@ plane.addEventListener("keydown", e => {
   if (!e.target.classList.contains("blk")) return;
   const id = e.target.dataset.id;
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pin(id); return; }
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+    e.preventDefault(); e.stopPropagation();
+    const i = byId(id), orig = { start: i.start, end: i.end, lane: i.lane, laneAt: i.laneAt };
+    i.lane = Math.max(0, Number(e.target.dataset.lane) + (e.key === "ArrowLeft" ? -1 : 1)); i.laneAt = Date.now();
+    commitTimes(i, orig, "move");
+    document.querySelector(`.blk[data-id="${id}"]`)?.focus();
+    return;
+  }
   if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
   e.preventDefault(); e.stopPropagation();
   const i = byId(id), step = (e.key === "ArrowUp" ? -SNAP : SNAP) * MIN, orig = { start: i.start, end: i.end };
@@ -954,10 +1146,12 @@ plane.addEventListener("keydown", e => {
   document.querySelector(`.blk[data-id="${id}"]`)?.focus();
 });
 function commitTimes(i, orig, mode){
-  if (i.start === orig.start && i.end === orig.end) { renderPlane(); return; }
+  const laneMoved = "lane" in orig && i.lane !== orig.lane;
+  if (i.start === orig.start && i.end === orig.end && !laneMoved) { renderPlane(); return; }
   save(i, true); renderAll();
   const msg = mode === "resize" ? `${i.code} now ends ${fmtWhen(i.end)} (${span(i.end - i.start)})` : `${i.code} moved to ${fmtWhen(i.start)} – ${fmtWhen(i.end)}`;
-  toast(msg, () => { i.start = orig.start; i.end = orig.end; save(i, true); renderAll(); });
+  const timesSame = i.start === orig.start && i.end === orig.end;
+  toast(timesSame ? `${i.code} moved to lane ${i.lane + 1}` : msg, () => { Object.assign(i, orig); save(i, true); renderAll(); });
 }
 plane.addEventListener("pointerdown", e => {
   if (e.button !== 0) return;
@@ -967,7 +1161,8 @@ plane.addEventListener("pointerdown", e => {
     id: i.id, el: blk, pid: e.pointerId, touch: e.pointerType === "touch",
     mode: e.target.closest(".grip") ? "resize" : "move",
     x0: e.clientX, y0: e.clientY, m0: slotAt(e.clientX, e.clientY), mLast: null,
-    orig: { start: i.start, end: i.end }, active: false, timer: null, tip: null
+    lane0: Number(blk.dataset.lane), lane: Number(blk.dataset.lane),
+    orig: { start: i.start, end: i.end, lane: i.lane, laneAt: i.laneAt }, active: false, timer: null, tip: null
   };
   // Touch: press and hold to pick a block up, so normal swipes still scroll.
   if (drag.touch) drag.timer = setTimeout(() => { if (drag && !drag.active) { beginDrag(); navigator.vibrate?.(12); } }, 350);
@@ -983,10 +1178,13 @@ function beginDrag(){
 }
 function updateDrag(x, y){
   const i = byId(drag.id), day = viewDay, next = addDays(day, 1);
-  const m = slotAt(x, y) ?? drag.mLast;
+  // Time is read at the column you grabbed in, so sliding sideways across the tilted plane doesn't nudge the time.
+  const m = slotAt(drag.x0, y) ?? slotAt(x, y) ?? drag.mLast;
   if (m != null && drag.m0 != null) {
     drag.mLast = m;
     if (drag.mode === "move") {
+      const ln = laneAt(x, y); if (ln != null) drag.lane = ln;
+      drag.el.style.left = (drag.lane * curLaneW + 4) + "px";
       const delta = m - drag.m0;
       i.start = drag.orig.start + delta * MIN; i.end = drag.orig.end + delta * MIN;
     } else {
@@ -1022,6 +1220,7 @@ function endDrag(e, cancelled){
   d.tip?.remove();
   const i = byId(d.id);
   if (cancelled) { i.start = d.orig.start; i.end = d.orig.end; renderPlane(); return; }
+  if (d.mode === "move" && d.lane !== d.lane0) { i.lane = d.lane; i.laneAt = Date.now(); }
   commitTimes(i, d.orig, d.mode);
 }
 window.addEventListener("pointerup", e => endDrag(e, false));
@@ -1069,7 +1268,7 @@ document.addEventListener("paste", async e => {
 const dlg = $("#newDialog");
 let nType = "reaction", nDur = lsGet("rt-dur") || "2h", nScheme = null, nSchemeAuto = false;
 function chipRow(el, entries, current){
-  el.innerHTML = entries.map(([k, v]) => `<button type="button" data-k="${k}" ${el.id === "nType" ? `data-type="${k}"` : ""} aria-pressed="${k === current}">${v}</button>`).join("");
+  el.innerHTML = entries.map(([k, v]) => `<button type="button" data-k="${k}" ${el.id === "nType" ? `data-type="${k}"` : ""} aria-pressed="${el.id === "nType" ? typePressed(current, k) : k === current}">${v}</button>`).join("");
 }
 function setNewScheme(s, note){
   nScheme = s; nSchemeAuto = !!note;
@@ -1081,7 +1280,7 @@ function setNewScheme(s, note){
 function openNew(startMs){
   $("#newForm").reset();
   nType = "reaction";
-  chipRow($("#nType"), Object.entries(TYPES), nType);
+  chipRow($("#nType"), TYPE_CHIPS, nType);
   chipRow($("#nDur"), DURS, nDur);
   const start = startMs ?? roundTo(Date.now(), 5);
   $("#nStart").value = toInput(start);
@@ -1092,7 +1291,7 @@ function openNew(startMs){
   dlg.showModal();
   $("#nCode").focus();
 }
-$("#nType").onclick = e => { const b = e.target.closest("button"); if (!b) return; nType = b.dataset.k; chipRow($("#nType"), Object.entries(TYPES), nType); };
+$("#nType").onclick = e => { const b = e.target.closest("button"); if (!b) return; nType = toggleType(nType, b.dataset.k); chipRow($("#nType"), TYPE_CHIPS, nType); };
 $("#nDur").onclick = e => {
   const b = e.target.closest("button"); if (!b) return; nDur = b.dataset.k; lsSet("rt-dur", nDur);
   chipRow($("#nDur"), DURS, nDur); $("#nHoursRow").hidden = nDur !== "custom";
@@ -1127,7 +1326,7 @@ $("#newForm").addEventListener("submit", e => {
   } else end = endFor(nDur, start);
   const item = { id: uid(), code, label: $("#nLabel").value.trim(), type: nType, start, end, outcome: "pending",
                  scheme: nScheme, conditions: "", notes: "", created: Date.now() };
-  if (nType === "reaction") item.color = nextColor(code);
+  if (nType !== "other") item.color = nextColor(code);
   if ($("#nRepeat").checked) {
     const s = makeSeriesFrom(item, true);
     const made = topUpSeries(s);
@@ -1225,11 +1424,11 @@ let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTime
   items.slice().sort((a,b) => (a.created||a.start) - (b.created||b.start)).forEach(i => {
     let changed = false;
     if (!TYPES[i.type]) { i.type = "other"; changed = true; }
-    if (i.type === "reaction" && !hasColor(i)) {
+    if (coloured(i) && !hasColor(i)) {
       const k = i.code.trim().toLowerCase();
       i.color = byCode[k] ?? (counter++ % RAIN); changed = true;
     }
-    if (i.type === "reaction") byCode[i.code.trim().toLowerCase()] = i.color;
+    if (coloured(i)) byCode[i.code.trim().toLowerCase()] = i.color;
     if (changed) Store.put(i);
   });
   series.forEach(topUpSeries);
@@ -1237,8 +1436,10 @@ let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTime
   lastSig = (() => { const { running, awaiting } = lists(Date.now()); return running.map(i => i.id).join() + "|" + awaiting.map(i => i.id).join(); })();
   renderAll(); scrollToFocus();
   let lastMinute = new Date().getMinutes();
+  const markReady = () => { const b = $("#weekBtn"); b.classList.toggle("ready", summaryReady()); b.title = summaryReady() ? "Your week summary is ready for Friday" : ""; };
+  markReady();
   setInterval(() => {
-    tick();
+    tick(); markReady();
     const m = new Date().getMinutes();
     if (m !== lastMinute) { lastMinute = m; renderPlane(); }
   }, 1000);
