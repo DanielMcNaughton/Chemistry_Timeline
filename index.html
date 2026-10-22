@@ -15,7 +15,8 @@
   --sep:rgba(60,60,67,.14); --sep-strong:rgba(60,60,67,.26);
   --text:#000000; --muted:rgba(60,60,67,.62); --faint:rgba(60,60,67,.34);
   --accent:#007AFF; --now:#FF3B30; --ok:#34C759; --fail:#FF3B30;
-  --c-reaction:#FF9500; --c-workup:#30B0C7; --c-column:#AF52DE; --c-analysis:#007AFF; --c-other:#8E8E93;
+  --c-reaction:#FF9500; --c-workup:#8E8E93; --c-column:#A2845E; --c-other:#AEAEB2;
+  --r0:#FF3B30; --r1:#FF9500; --r2:#E6B800; --r3:#34C759; --r4:#00C7BE; --r5:#32ADE6; --r6:#007AFF; --r7:#5856D6; --r8:#AF52DE; --r9:#FF2D55;
   --shadow:0 1px 2px rgba(0,0,0,.04), 0 10px 36px rgba(0,0,0,.07);
   --plane-shadow:0 1px 2px rgba(0,0,0,.05), 0 30px 60px -20px rgba(0,0,0,.18);
   --glass:rgba(242,242,247,.74);
@@ -32,7 +33,8 @@
     --sep:rgba(84,84,88,.45); --sep-strong:rgba(84,84,88,.75);
     --text:#FFFFFF; --muted:rgba(235,235,245,.62); --faint:rgba(235,235,245,.3);
     --accent:#0A84FF; --now:#FF453A; --ok:#30D158; --fail:#FF453A;
-    --c-reaction:#FF9F0A; --c-workup:#40C8E0; --c-column:#BF5AF2; --c-analysis:#0A84FF; --c-other:#98989D;
+    --c-reaction:#FF9F0A; --c-workup:#98989D; --c-column:#AC8E68; --c-other:#8E8E93;
+    --r0:#FF453A; --r1:#FF9F0A; --r2:#FFD60A; --r3:#30D158; --r4:#63E6E2; --r5:#64D2FF; --r6:#0A84FF; --r7:#5E5CE6; --r8:#BF5AF2; --r9:#FF375F;
     --shadow:0 0 0 1px rgba(255,255,255,.05), 0 10px 36px rgba(0,0,0,.5);
     --plane-shadow:0 0 0 1px rgba(255,255,255,.06), 0 30px 60px -20px rgba(0,0,0,.8);
     --glass:rgba(0,0,0,.66);
@@ -45,7 +47,8 @@
   --sep:rgba(84,84,88,.45); --sep-strong:rgba(84,84,88,.75);
   --text:#FFFFFF; --muted:rgba(235,235,245,.62); --faint:rgba(235,235,245,.3);
   --accent:#0A84FF; --now:#FF453A; --ok:#30D158; --fail:#FF453A;
-  --c-reaction:#FF9F0A; --c-workup:#40C8E0; --c-column:#BF5AF2; --c-analysis:#0A84FF; --c-other:#98989D;
+  --c-reaction:#FF9F0A; --c-workup:#98989D; --c-column:#AC8E68; --c-other:#8E8E93;
+    --r0:#FF453A; --r1:#FF9F0A; --r2:#FFD60A; --r3:#30D158; --r4:#63E6E2; --r5:#64D2FF; --r6:#0A84FF; --r7:#5E5CE6; --r8:#BF5AF2; --r9:#FF375F;
   --shadow:0 0 0 1px rgba(255,255,255,.05), 0 10px 36px rgba(0,0,0,.5);
   --plane-shadow:0 0 0 1px rgba(255,255,255,.06), 0 30px 60px -20px rgba(0,0,0,.8);
   --glass:rgba(0,0,0,.66);
@@ -54,7 +57,6 @@
 [data-type="reaction"]{--edge:var(--c-reaction)}
 [data-type="workup"]{--edge:var(--c-workup)}
 [data-type="column"]{--edge:var(--c-column)}
-[data-type="analysis"]{--edge:var(--c-analysis)}
 [data-type="other"]{--edge:var(--c-other)}
 
 /* =========================================================
@@ -218,6 +220,7 @@ body.is-resizing,body.is-resizing *{cursor:ns-resize !important}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{padding:7px 12px;font-size:14px;border-radius:999px}
 .chips.types button[aria-pressed="true"]{background:var(--edge);color:#fff}
+.chips.types button[data-type="other"][aria-pressed="true"]{background:#8E8E93}
 .chips.dur button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .chips.small button{font-size:13px;padding:6px 10px}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px;border-radius:10px;background:var(--fill);margin-top:10px}
@@ -236,6 +239,44 @@ body.is-resizing,body.is-resizing *{cursor:ns-resize !important}
 .list-btns button+button{border-top:.5px solid var(--sep)}
 .list-btns button:hover{background:var(--fill)}
 .list-btns .danger{color:var(--fail)}
+
+/* ---------- Round 3: meetings, repeats, swatches, to-do, switch ---------- */
+[hidden]{display:none !important}
+.blk[data-type="other"]{background:repeating-linear-gradient(135deg, color-mix(in srgb, var(--edge) 13%, var(--surface)) 0 7px, color-mix(in srgb, var(--edge) 24%, var(--surface)) 7px 14px)}
+.rep{margin-left:5px;font-weight:600;opacity:.75}
+.swatches{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sw{width:26px;height:26px;padding:0;border-radius:50%;background:var(--edge)}
+.sw:hover{background:var(--edge);transform:scale(1.08)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--edge)}
+.series-note{margin-top:14px;padding:10px 14px;border-radius:14px;background:var(--surface-2);font-size:14px;color:var(--muted)}
+.series-note b{color:var(--text);font-weight:600}
+.hours-in{max-width:110px;font-variant-numeric:tabular-nums}
+.switch-row{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--text);font-size:15px}
+.switch{appearance:none;-webkit-appearance:none;width:51px;height:31px;flex:0 0 auto;border-radius:999px;background:var(--fill-2);position:relative;cursor:pointer;padding:0;transition:background .2s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.2);transition:transform .2s}
+.switch:checked{background:var(--ok)}
+.switch:checked::after{transform:translateX(20px)}
+
+.side{display:flex;flex-direction:column;gap:14px;min-height:0}
+.side .card-wrap{flex:1 1 auto}
+.todo{flex:0 1 auto;max-height:38%;min-height:0;display:flex;flex-direction:column;background:var(--surface);border-radius:22px;box-shadow:var(--shadow);padding:14px 16px 8px}
+.todo-head{display:flex;align-items:baseline;justify-content:space-between}
+.todo-head h2{font:700 19px/1.2 var(--font-display);letter-spacing:-.02em;margin:0}
+.todo-count{color:var(--muted);font:500 15px/1 var(--font);margin-left:6px}
+#todoInput{margin:10px 0 4px}
+#todoList{list-style:none;margin:0;padding:0;overflow:auto;min-height:0}
+.todo-item{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:.5px solid var(--sep)}
+.todo-item:first-child{border-top:0}
+.check{flex:0 0 auto;width:22px;height:22px;border-radius:50%;padding:0;background:transparent;box-shadow:inset 0 0 0 1.5px var(--sep-strong);display:grid;place-items:center;color:#fff;font:700 12px/1 var(--font)}
+.check:hover{background:var(--fill)}
+.check[aria-pressed="true"]{background:var(--accent);box-shadow:none}
+.todo-text{flex:1;min-width:0;word-break:break-word}
+.todo-item.done .todo-text{color:var(--faint);text-decoration:line-through}
+.todo-del{background:transparent;color:var(--faint);padding:2px 6px;opacity:0;font-size:17px}
+.todo-del:hover{background:var(--fill);color:var(--fail)}
+.todo-item:hover .todo-del,.todo-del:focus-visible{opacity:1}
+@media (hover:none){.todo-del{opacity:1}}
+.todo-empty{color:var(--faint);font-size:13.5px;padding:6px 2px 8px}
 
 /* =========================================================
    Dialogs & toast
@@ -261,6 +302,7 @@ dialog form{display:flex;flex-direction:column;gap:14px}
 @media (max-width: 900px){
   .shell{grid-template-columns:1fr;height:auto;padding:12px 12px 32px}
   .card{height:auto;overflow:visible}
+  .todo{max-height:none}
   .stage{overflow:auto hidden;perspective:none;padding:0}
   .plane{transform:none}
   .daynav h1{font-size:19px;margin-left:6px}
@@ -289,7 +331,14 @@ dialog form{display:flex;flex-direction:column;gap:14px}
 <div id="banner"></div>
 
 <main class="shell">
-  <aside class="card-wrap" id="cardWrap" aria-live="polite"><div class="card" id="card"></div></aside>
+  <div class="side">
+    <aside class="card-wrap" id="cardWrap" aria-live="polite"><div class="card" id="card"></div></aside>
+    <section class="todo" aria-label="To do">
+      <div class="todo-head"><h2>To do<span class="todo-count" id="todoCount"></span></h2><button class="link" id="todoClear" hidden>Clear done</button></div>
+      <form id="todoForm"><input id="todoInput" autocomplete="off" placeholder="Add a task, e.g. freeze dry DMC-45" aria-label="New task"></form>
+      <ul id="todoList"></ul>
+    </section>
+  </div>
   <section class="stage" id="stage" aria-label="Day timeline"><div class="plane" id="plane"></div></section>
 </main>
 
@@ -309,7 +358,11 @@ dialog form{display:flex;flex-direction:column;gap:14px}
     </div>
     <div class="field">Duration
       <div class="chips dur" id="nDur"></div>
-      <input type="datetime-local" id="nEnd" hidden aria-label="End time">
+      <div class="row" id="nHoursRow" hidden><input type="number" class="hours-in" id="nHours" min="0.25" step="0.25" inputmode="decimal" placeholder="e.g. 3.5" aria-label="Length in hours"><span style="color:var(--text)">hours</span></div>
+    </div>
+    <div class="field">
+      <label class="switch-row">Repeat every week<input type="checkbox" class="switch" id="nRepeat"></label>
+      <span class="note" id="nRepeatNote"></span>
     </div>
     <div class="field">Scheme
       <div class="scheme-drop" id="nScheme" tabindex="0">Paste (Ctrl/Cmd + V) or drop an image. Optional.</div>
@@ -351,39 +404,42 @@ dialog form{display:flex;flex-direction:column;gap:14px}
    Everything goes through Store. A Google Sheets backend later only needs
    another object with the same methods. Same database as v1, so existing entries carry over. */
 const Store = (() => {
-  const DB = "reaction-timeline", VER = 1, OS = "items";
+  const DB = "reaction-timeline", VER = 2, STORES = ["items", "todos", "series"];
   let dbp = null, memory = null;
   function open(){
     if (!dbp) dbp = new Promise((res, rej) => {
       try {
         const r = indexedDB.open(DB, VER);
-        r.onupgradeneeded = () => r.result.createObjectStore(OS, { keyPath: "id" });
+        r.onupgradeneeded = () => { for (const n of STORES) if (!r.result.objectStoreNames.contains(n)) r.result.createObjectStore(n, { keyPath: "id" }); };
         r.onsuccess = () => res(r.result);
         r.onerror = () => rej(r.error);
       } catch (e) { rej(e); }
     });
     return dbp;
   }
-  async function tx(mode, fn){
+  async function tx(os, mode, fn){
     const db = await open();
     return new Promise((res, rej) => {
-      const t = db.transaction(OS, mode);
-      const req = fn(t.objectStore(OS));
+      const t = db.transaction(os, mode);
+      const req = fn(t.objectStore(os));
       t.oncomplete = () => res(req ? req.result : undefined);
       t.onerror = () => rej(t.error);
     });
   }
   return {
-    async init(){ try { await open(); return true; } catch { memory = new Map(); return false; } },
-    async all(){ return memory ? [...memory.values()] : tx("readonly", s => s.getAll()); },
-    async put(item){ return memory ? memory.set(item.id, item) : tx("readwrite", s => s.put(item)); },
-    async remove(id){ return memory ? memory.delete(id) : tx("readwrite", s => s.delete(id)); },
+    async init(){ try { await open(); return true; } catch { memory = Object.fromEntries(STORES.map(n => [n, new Map()])); return false; } },
+    async all(os = "items"){ return memory ? [...memory[os].values()] : tx(os, "readonly", s => s.getAll()); },
+    async put(x, os = "items"){ return memory ? memory[os].set(x.id, x) : tx(os, "readwrite", s => s.put(x)); },
+    async remove(id, os = "items"){ return memory ? memory[os].delete(id) : tx(os, "readwrite", s => s.delete(id)); },
   };
 })();
 
 /* ================= Constants & helpers ================= */
 const MIN = 60000, HOUR = 60 * MIN;
-const TYPES = { reaction: "Reaction", workup: "Workup", column: "Column", analysis: "NMR / analysis", other: "Meeting / other" };
+const TYPES = { reaction: "Reaction", workup: "Workup", column: "Column", other: "Meeting / other" };
+const RAIN = 10;   // rainbow colours --r0 … --r9
+const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const SERIES_WEEKS = 12;   // how far ahead weekly repeats are filled in
 const DURS = [["30m","30 min"],["1h","1 h"],["2h","2 h"],["4h","4 h"],["overnight","Overnight"],["custom","Custom"]];
 const DAY_START = 7 * 60, DAY_END = 19 * 60;
 const EARLY_H = 46, SLOT_H = 32, LATE_H = 66, GUTTER = 58, MIN_LANE_W = 150;
@@ -436,6 +492,24 @@ function lsSet(k, v){ try { localStorage.setItem(k, v); } catch {} }
 const flatMQ = matchMedia("(max-width: 900px)");
 const isFlat = () => flatMQ.matches;
 const isRunning = (i, now = Date.now()) => i.start <= now && i.end > now;
+const hasColor = i => Number.isInteger(i.color);
+function edgeOf(i){ return i.type === "reaction" ? `var(--r${hasColor(i) ? i.color : 1})` : `var(--c-${i.type})`; }
+const paint = i => `data-type="${i.type}" style="--edge:${edgeOf(i)}"`;
+// New reactions get the next rainbow colour that isn't in use; a repeat of the same code keeps its colour.
+function nextColor(code){
+  const c = (code || "").trim().toLowerCase();
+  const rx = items.filter(i => i.type === "reaction" && hasColor(i));
+  const same = rx.filter(i => i.code.trim().toLowerCase() === c).sort((a,b) => (b.created||0) - (a.created||0))[0];
+  if (same) return same.color;
+  const last = rx.slice().sort((a,b) => (b.created||0) - (a.created||0))[0];
+  const counts = Array(RAIN).fill(0);
+  new Set(rx.filter(i => i.end > Date.now() - 3 * 24 * HOUR).map(i => i.code.trim().toLowerCase() + "|" + i.color))
+    .forEach(k => counts[Number(k.split("|").pop())]++);
+  const from = last ? (last.color + 1) % RAIN : 0;
+  let best = from;
+  for (let k = 0; k < RAIN; k++) { const col = (from + k) % RAIN; if (counts[col] < counts[best]) best = col; }
+  return best;
+}
 
 /* ================= State ================= */
 let items = [];
@@ -534,7 +608,7 @@ function renderPlane(){
 
   const blocks = rows.map(({ i, y1, y2, lane }) => {
     const h = y2 - y1, before = i.start < day, after = i.end > next;
-    let inner = `<span class="code">${esc(i.code)}</span>`;
+    let inner = `<span class="code">${esc(i.code)}${i.seriesId ? `<span class="rep" title="Repeats weekly">↻</span>` : ""}</span>`;
     if (h >= 42) inner += `<span class="lbl">${esc(i.label || TYPES[i.type])}</span>`;
     if (h >= 60) inner += `<span class="tm">${before ? fmtWhen(i.start) : fmtTime(i.start)} – ${after ? fmtWhen(i.end) : fmtTime(i.end)}</span>`;
     else if (h >= 48 && (before || after)) inner += `<span class="cont">${before ? "from " + fmtWhen(i.start) : "until " + fmtWhen(i.end)}</span>`;
@@ -543,7 +617,7 @@ function renderPlane(){
     const cls = ["blk", isRunning(i, now) && "running", i.id === selectedId && "sel", i.id === hoverId && "hover"].filter(Boolean).join(" ");
     return `<div class="${cls}" data-type="${i.type}" data-id="${i.id}" tabindex="0" role="button"
       aria-label="${esc(i.code)}, ${fmtTime(i.start)} to ${fmtTime(i.end)}. Arrow keys move it, Shift + arrow keys change the end time."
-      style="top:${y1+1}px;height:${h-2}px;left:${lane*laneW+4}px;width:${laneW-8}px">${inner}${badge}${grip}</div>`;
+      style="--edge:${edgeOf(i)};top:${y1+1}px;height:${h-2}px;left:${lane*laneW+4}px;width:${laneW-8}px">${inner}${badge}${grip}</div>`;
   }).join("");
 
   const nowLine = day === startOfDay(now) ? `<div class="tl-now" style="top:${yOf(minuteOfDay(now, day, next))}px"><b>${fmtTime(now)}</b></div>` : "";
@@ -586,13 +660,10 @@ function lists(now){
   return { running, awaiting };
 }
 function thumb(i){ return i.scheme ? `<span class="thumb"><img src="${i.scheme}" alt=""></span>` : `<span class="thumb empty-thumb"></span>`; }
-function setGlow(type){
-  if (type) cardWrap.dataset.type = type; else delete cardWrap.dataset.type;
-  cardWrap.style.setProperty("--glow", type ? "var(--edge)" : "transparent");
-}
+function setGlow(i){ cardWrap.style.setProperty("--glow", i ? edgeOf(i) : "transparent"); }
 function renderHome(){
   const now = Date.now(), { running, awaiting } = lists(now);
-  setGlow(running[0]?.type);
+  setGlow(running[0]);
   let html = `<h2 class="large-title">Running now</h2>`;
   if (!running.length && !awaiting.length) {
     html += `<div class="empty"><p class="empty-title">Nothing running</p>
@@ -601,14 +672,14 @@ function renderHome(){
   } else {
     html += `<p class="card-sub">${running.length ? `${running.length} on the go` : "Nothing running"}</p>`;
     if (running.length) html += `<div class="run-list">` + running.map(i => `
-      <button class="run-row" data-type="${i.type}" data-open="${i.id}">
+      <button class="run-row" ${paint(i)} data-open="${i.id}">
         ${thumb(i)}
         <span style="min-width:0"><span class="rr-code">${esc(i.code)}</span><span class="rr-sub">${esc(i.label || TYPES[i.type])}</span></span>
         <span class="rr-time"><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span></span>
         <span class="bar-track"><i data-bar="${i.id}"></i></span>
       </button>`).join("") + `</div>`;
     if (awaiting.length) html += `<h3 class="section-title">Finished, waiting for a result</h3><div class="run-list">` + awaiting.map(i => `
-      <div class="wait-row" data-type="${i.type}" data-open="${i.id}">
+      <div class="wait-row" ${paint(i)} data-open="${i.id}">
         <span style="min-width:0"><span class="rr-code">${esc(i.code)}</span><span class="rr-sub">ended ${fmtWhen(i.end)}</span></span>
         <button class="btn-ok" data-outcome="ok" data-id="${i.id}">✓ Worked</button>
         <button class="btn-fail" data-outcome="fail" data-id="${i.id}">✗ Failed</button>
@@ -625,9 +696,9 @@ function statusOf(i, now){
 }
 function renderPreview(i){
   const now = Date.now(), [scls, stxt] = statusOf(i, now);
-  setGlow(i.type);
+  setGlow(i);
   card.innerHTML = `
-    <div class="pv-top" data-type="${i.type}"><span class="pill">${TYPES[i.type]}</span><span class="status ${scls}">${stxt}</span></div>
+    <div class="pv-top" ${paint(i)}><span class="pill">${TYPES[i.type]}</span><span class="status ${scls}">${stxt}</span></div>
     <h2 class="pv-code">${esc(i.code)}</h2>
     <p class="pv-label">${esc(i.label) || "&nbsp;"}</p>
     <div class="scheme-view ${i.scheme ? "" : "none"}">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}">` : "No scheme yet"}</div>
@@ -636,30 +707,32 @@ function renderPreview(i){
       <div><dt>End</dt><dd>${fmtWhen(i.end)}</dd></div>
       <div><dt>Length</dt><dd>${span(i.end - i.start)}</dd></div>
     </dl>
-    ${isRunning(i, now) ? `<div class="pv-live" data-type="${i.type}"><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span><div class="bar-track"><i data-bar="${i.id}"></i></div></div>` : ""}
+    ${isRunning(i, now) ? `<div class="pv-live" ${paint(i)}><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span><div class="bar-track"><i data-bar="${i.id}"></i></div></div>` : ""}
     ${i.conditions ? `<div class="pv-text"><h4>Conditions</h4><p>${esc(i.conditions)}</p></div>` : ""}
     ${i.notes ? `<div class="pv-text"><h4>Notes</h4><p>${esc(i.notes)}</p></div>` : ""}
     <p class="hint">Click the block to edit it. Drag to move it, or drag its bottom edge to change the length.</p>`;
 }
 function renderEditor(i){
-  setGlow(i.type);
+  setGlow(i);
   const typeChips = Object.entries(TYPES).map(([k, v]) => `<button data-type="${k}" aria-pressed="${i.type === k}">${v}</button>`).join("");
   const seg = [["pending","Pending"],["ok","✓ Worked"],["fail","✗ Failed"]].map(([v,l]) => `<button data-v="${v}" aria-pressed="${i.outcome === v}">${l}</button>`).join("");
-  const live = isRunning(i) ? `<div class="pv-live" data-type="${i.type}"><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span><div class="bar-track"><i data-bar="${i.id}"></i></div></div>` : "";
+  const live = isRunning(i) ? `<div class="pv-live" ${paint(i)}><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span><div class="bar-track"><i data-bar="${i.id}"></i></div></div>` : "";
   card.innerHTML = `
     <div class="ed-top"><button class="link" id="eBack">‹ Running now</button><button class="link strong" id="eDone">Done</button></div>
     <input class="title-input" id="pCode" value="${esc(i.code)}" aria-label="Code" autocomplete="off">
     <input class="sub-input" id="pLabel" value="${esc(i.label)}" placeholder="Add a description" aria-label="Description" autocomplete="off">
     <div class="chips types" id="pType">${typeChips}</div>
-    <div class="seg" id="pOutcome" aria-label="Result">${seg}</div>
+    ${i.type === "reaction" ? `<div class="swatches" id="pColor" aria-label="Colour">${Array.from({length: RAIN}, (_, k) => `<button class="sw" style="--edge:var(--r${k})" data-c="${k}" aria-pressed="${i.color === k}" aria-label="Colour ${k + 1}"></button>`).join("")}</div>` : ""}
+    ${i.type === "other" ? "" : `<div class="seg" id="pOutcome" aria-label="Result">${seg}</div>`}
     ${live}
     <div class="group">
       <div class="g-row"><span>Start</span><input type="datetime-local" id="pStart" value="${toInput(i.start)}"></div>
       <div class="g-row"><span>End</span><input type="datetime-local" id="pEnd" value="${toInput(i.end)}"></div>
+      <div class="g-row"><span>Length</span><input type="number" class="hours-in" id="pHours" min="0.25" step="0.25" inputmode="decimal" value="${+((i.end - i.start) / HOUR).toFixed(2)}"><span style="color:var(--muted)">hours</span></div>
       <div class="g-col"><div class="chips small" id="pQuick">
         <button data-a="-30">−30 min</button><button data-a="30">+30 min</button><button data-a="60">+1 h</button>
         <button data-a="now">End now</button><button data-a="overnight">Overnight</button>
-      </div><span class="note">${span(i.end - i.start)}</span></div>
+      </div></div>
     </div>
     <div class="scheme-drop ${i.scheme ? "has" : ""}" id="pScheme" tabindex="0">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}">` : "Copy from ChemDraw, then paste here (Ctrl/Cmd + V). You can also drop or choose an image."}</div>
     <div class="row" style="margin-top:8px"><button id="pSchemePick">Choose image</button>${i.scheme ? `<button id="pSchemeRemove" style="color:var(--fail)">Remove scheme</button>` : ""}</div>
@@ -667,9 +740,11 @@ function renderEditor(i){
       <div class="g-col"><label for="pCond">Conditions</label><textarea id="pCond" rows="2" placeholder="e.g. Pd(PPh3)4, K2CO3, dioxane/H2O, 90 °C">${esc(i.conditions)}</textarea></div>
       <div class="g-col"><label for="pNotes">Notes</label><textarea id="pNotes" rows="3" placeholder="TLC, observations, yield">${esc(i.notes)}</textarea></div>
     </div>
+    ${seriesNote(i)}
     <div class="list-btns">
-      <button id="pAgain">Run again now</button>
-      <button class="danger" id="pDelete">Delete entry</button>
+      ${i.type === "other" ? "" : `<button id="pAgain">Run again now</button>`}
+      ${seriesButtons(i)}
+      <button class="danger" id="pDelete">${i.seriesId ? "Delete this week only" : "Delete entry"}</button>
     </div>`;
 
   const upd = (fn, opts = {}) => { fn(i); save(i, opts.now); renderPlane(); if (opts.card) renderCard(true); refreshCodes(); };
@@ -679,8 +754,11 @@ function renderEditor(i){
   $("#pCond").oninput = e => upd(x => x.conditions = e.target.value);
   $("#pNotes").oninput = e => upd(x => x.notes = e.target.value);
   const redo = () => { cardKey = ""; renderCard(true); };
-  $("#pType").onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => x.type = b.dataset.type, { now: true }); redo(); } };
-  $("#pOutcome").onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => x.outcome = b.dataset.v, { now: true }); redo(); } };
+  $("#pType").onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => { x.type = b.dataset.type; if (x.type === "reaction" && !hasColor(x)) x.color = nextColor(x.code); }, { now: true }); redo(); } };
+  const pc = $("#pColor"); if (pc) pc.onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => x.color = Number(b.dataset.c), { now: true }); redo(); } };
+  const po = $("#pOutcome"); if (po) po.onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => x.outcome = b.dataset.v, { now: true }); redo(); } };
+  $("#pHours").onchange = e => { const h = parseFloat(e.target.value); if (h > 0) { upd(x => x.end = x.start + Math.round(h * 60) * MIN, { now: true }); redo(); } };
+  wireSeries(i);
   $("#pStart").onchange = e => { const t = fromInput(e.target.value); if (t) { upd(x => { const d = x.end - x.start; x.start = t; x.end = t + d; }, { now: true }); redo(); } };
   $("#pEnd").onchange = e => { const t = fromInput(e.target.value); if (t) { upd(x => x.end = t > x.start ? t : x.start + 30 * MIN, { now: true }); redo(); } };
   $("#pQuick").onclick = e => {
@@ -696,9 +774,10 @@ function renderEditor(i){
   $("#pScheme").onclick = () => { if (!i.scheme) pickScheme(i.id); };
   const rm = $("#pSchemeRemove"); if (rm) rm.onclick = () => { upd(x => x.scheme = null, { now: true }); redo(); };
   wireDrop($("#pScheme"), async f => { const s = await imageToDataURL(f); upd(x => x.scheme = s, { now: true }); redo(); toast("Scheme added"); });
-  $("#pAgain").onclick = () => {
+  const pa = $("#pAgain"); if (pa) pa.onclick = () => {
     const start = roundTo(Date.now(), 5), dur = i.end - i.start;
     const copy = { ...i, id: uid(), start, end: start + dur, outcome: "pending", notes: "", created: Date.now() };
+    delete copy.seriesId;
     items.push(copy); save(copy, true); viewDay = startOfDay(start); pin(copy.id); toast(`Started ${copy.code} again`);
   };
   $("#pDelete").onclick = async () => {
@@ -706,6 +785,108 @@ function renderEditor(i){
     items = items.filter(x => x.id !== i.id); await Store.remove(i.id); unpin(); refreshCodes(); toast("Entry deleted");
   };
 }
+/* ---------- Weekly repeats ---------- */
+let series = [];
+const seriesOf = i => i.seriesId ? series.find(s => s.id === i.seriesId) : null;
+function topUpSeries(s){
+  if (!s.active) return [];
+  const horizon = addDays(startOfDay(Date.now()), SERIES_WEEKS * 7), made = [];
+  let day = s.generatedUntil != null ? addDays(s.generatedUntil, 7) : s.firstDay;
+  while (day <= horizon) {
+    const st = atMinute(day, s.startMin);
+    const it = { id: uid(), code: s.code, label: s.label, type: s.type, start: st, end: st + s.durMin * MIN, outcome: "pending",
+                 scheme: s.scheme || null, conditions: "", notes: "", created: Date.now(), seriesId: s.id };
+    if (s.type === "reaction") it.color = s.color;
+    items.push(it); Store.put(it); made.push(it);
+    s.generatedUntil = day; day = addDays(day, 7);
+  }
+  Store.put(s, "series");
+  return made;
+}
+function makeSeriesFrom(i, includeThis){
+  const d = new Date(i.start);
+  const s = { id: uid(), code: i.code, label: i.label, type: i.type, color: i.color, scheme: i.scheme || null,
+              startMin: d.getHours() * 60 + d.getMinutes(), durMin: Math.round((i.end - i.start) / MIN),
+              firstDay: startOfDay(i.start), generatedUntil: includeThis ? null : startOfDay(i.start), active: true };
+  series.push(s);
+  return s;
+}
+function seriesNote(i){
+  const s = seriesOf(i);
+  if (!s) return "";
+  return `<div class="series-note">${s.active ? `Repeats every <b>${WEEKDAYS[new Date(i.start).getDay()]}</b> at <b>${fmtTime(atMinute(startOfDay(i.start), s.startMin))}</b>. Changes here only affect this week unless you apply them to all future weeks.` : "This was part of a weekly repeat that has been stopped."}</div>`;
+}
+function seriesButtons(i){
+  const s = seriesOf(i);
+  if (!s) return `<button id="sMake">Repeat every ${WEEKDAYS[new Date(i.start).getDay()]}</button>`;
+  if (!s.active) return "";
+  return `<button id="sApply">Apply changes to all future weeks</button><button class="danger" id="sStop">Stop repeating after this week</button>`;
+}
+function wireSeries(i){
+  const mk = $("#sMake");
+  if (mk) mk.onclick = () => {
+    const s = makeSeriesFrom(i, false);
+    i.seriesId = s.id; save(i, true);
+    const made = topUpSeries(s);
+    renderAll(); cardKey = ""; renderCard(true);
+    toast(`${i.code} now repeats every ${WEEKDAYS[new Date(i.start).getDay()]} (${made.length} weeks filled in)`);
+  };
+  const ap = $("#sApply");
+  if (ap) ap.onclick = () => {
+    const s = seriesOf(i), d = new Date(i.start);
+    Object.assign(s, { code: i.code, label: i.label, type: i.type, color: i.color, startMin: d.getHours() * 60 + d.getMinutes(), durMin: Math.round((i.end - i.start) / MIN) });
+    let n = 0;
+    items.filter(x => x.seriesId === s.id && x.start > i.start).forEach(x => {
+      x.code = s.code; x.label = s.label; x.type = s.type; x.color = s.color;
+      x.start = atMinute(startOfDay(x.start), s.startMin); x.end = x.start + s.durMin * MIN;
+      save(x, true); n++;
+    });
+    Store.put(s, "series"); renderAll(); toast(`Updated ${n} future weeks`);
+  };
+  const st = $("#sStop");
+  if (st) st.onclick = async () => {
+    const s = seriesOf(i);
+    const future = items.filter(x => x.seriesId === s.id && x.start > i.start);
+    if (!confirm(`Stop repeating ${i.code}? The ${future.length} future weeks will be removed. This week stays.`)) return;
+    s.active = false; Store.put(s, "series");
+    for (const x of future) await Store.remove(x.id);
+    items = items.filter(x => !future.includes(x));
+    renderAll(); cardKey = ""; renderCard(true); toast(`${i.code} no longer repeats`);
+  };
+}
+
+/* ---------- To-do list ---------- */
+let todos = [];
+function renderTodos(){
+  const open = todos.filter(t => !t.done).sort((a,b) => a.created - b.created);
+  const done = todos.filter(t => t.done).sort((a,b) => (b.doneAt||0) - (a.doneAt||0));
+  $("#todoCount").textContent = open.length ? String(open.length) : "";
+  $("#todoClear").hidden = !done.length;
+  $("#todoList").innerHTML = (open.length || done.length) ? [...open, ...done].map(t => `
+    <li class="todo-item ${t.done ? "done" : ""}" data-id="${t.id}">
+      <button class="check" aria-pressed="${!!t.done}" aria-label="${t.done ? "Mark not done" : "Mark done"}">${t.done ? "✓" : ""}</button>
+      <span class="todo-text">${esc(t.text)}</span>
+      <button class="todo-del" aria-label="Delete task">×</button>
+    </li>`).join("") : `<li class="todo-empty">Nothing waiting. Add samples to analyse, freeze dry or chase up.</li>`;
+}
+$("#todoForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const text = $("#todoInput").value.trim(); if (!text) return;
+  const t = { id: uid(), text, done: false, created: Date.now() };
+  todos.push(t); Store.put(t, "todos"); $("#todoInput").value = ""; renderTodos();
+});
+$("#todoList").addEventListener("click", e => {
+  const li = e.target.closest(".todo-item"); if (!li) return;
+  const t = todos.find(x => x.id === li.dataset.id); if (!t) return;
+  if (e.target.closest(".check")) { t.done = !t.done; t.doneAt = t.done ? Date.now() : null; Store.put(t, "todos"); renderTodos(); }
+  else if (e.target.closest(".todo-del")) { todos = todos.filter(x => x !== t); Store.remove(t.id, "todos"); renderTodos(); }
+});
+$("#todoClear").onclick = () => {
+  const done = todos.filter(t => t.done);
+  done.forEach(t => Store.remove(t.id, "todos"));
+  todos = todos.filter(t => !t.done); renderTodos();
+};
+
 function pin(id){
   selectedId = id; hoverId = null; cardKey = "";
   renderCard(true); renderPlane();
@@ -904,8 +1085,9 @@ function openNew(startMs){
   chipRow($("#nDur"), DURS, nDur);
   const start = startMs ?? roundTo(Date.now(), 5);
   $("#nStart").value = toInput(start);
-  $("#nEnd").hidden = nDur !== "custom";
-  $("#nEnd").value = toInput(start + HOUR);
+  $("#nHoursRow").hidden = nDur !== "custom";
+  $("#nHours").value = lsGet("rt-hours") || "";
+  $("#nRepeat").checked = false; repeatNote();
   setNewScheme(null);
   dlg.showModal();
   $("#nCode").focus();
@@ -913,9 +1095,16 @@ function openNew(startMs){
 $("#nType").onclick = e => { const b = e.target.closest("button"); if (!b) return; nType = b.dataset.k; chipRow($("#nType"), Object.entries(TYPES), nType); };
 $("#nDur").onclick = e => {
   const b = e.target.closest("button"); if (!b) return; nDur = b.dataset.k; lsSet("rt-dur", nDur);
-  chipRow($("#nDur"), DURS, nDur); $("#nEnd").hidden = nDur !== "custom";
+  chipRow($("#nDur"), DURS, nDur); $("#nHoursRow").hidden = nDur !== "custom";
+  if (nDur === "custom") $("#nHours").focus();
 };
-$("#nNow").onclick = () => { $("#nStart").value = toInput(roundTo(Date.now(), 5)); };
+$("#nNow").onclick = () => { $("#nStart").value = toInput(roundTo(Date.now(), 5)); repeatNote(); };
+function repeatNote(){
+  const t = fromInput($("#nStart").value);
+  $("#nRepeatNote").textContent = $("#nRepeat").checked && t ? `Every ${WEEKDAYS[new Date(t).getDay()]} at ${fmtTime(t)}, filled in ${SERIES_WEEKS} weeks ahead.` : "";
+}
+$("#nRepeat").onchange = repeatNote;
+$("#nStart").addEventListener("change", repeatNote);
 $("#nCode").addEventListener("change", () => {
   if (nScheme && !nSchemeAuto) return;
   const s = latestSchemeFor($("#nCode").value);
@@ -929,9 +1118,23 @@ $("#newForm").addEventListener("submit", e => {
   e.preventDefault();
   const code = $("#nCode").value.trim(); if (!code) return;
   const start = fromInput($("#nStart").value) ?? Date.now();
-  const end = endFor(nDur, start, fromInput($("#nEnd").value));
+  let end;
+  if (nDur === "custom") {
+    const h = parseFloat($("#nHours").value);
+    if (!(h > 0)) { $("#nHours").focus(); toast("Type how many hours it runs for, e.g. 3.5"); return; }
+    lsSet("rt-hours", String(h));
+    end = start + Math.round(h * 60) * MIN;
+  } else end = endFor(nDur, start);
   const item = { id: uid(), code, label: $("#nLabel").value.trim(), type: nType, start, end, outcome: "pending",
                  scheme: nScheme, conditions: "", notes: "", created: Date.now() };
+  if (nType === "reaction") item.color = nextColor(code);
+  if ($("#nRepeat").checked) {
+    const s = makeSeriesFrom(item, true);
+    const made = topUpSeries(s);
+    dlg.close(); viewDay = startOfDay(start); refreshCodes(); pin(made[0].id);
+    toast(`${code} added every ${WEEKDAYS[new Date(start).getDay()]} for the next ${made.length} weeks`);
+    return;
+  }
   items.push(item); save(item, true); dlg.close();
   viewDay = startOfDay(start); refreshCodes(); pin(item.id);
   toast(`${code} added, ends ${fmtWhen(end)}`);
@@ -941,7 +1144,7 @@ $("#newForm").addEventListener("submit", e => {
 $("#menuBtn").onclick = () => { markTheme(); $("#menuDialog").showModal(); };
 $("#menuClose").onclick = () => $("#menuDialog").close();
 $("#exportBtn").onclick = () => {
-  const blob = new Blob([JSON.stringify({ app: "reaction-timeline", version: 1, exported: new Date().toISOString(), items }, null, 1)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify({ app: "reaction-timeline", version: 2, exported: new Date().toISOString(), items, todos, series }, null, 1)], { type: "application/json" });
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
   a.download = `reaction-timeline-${toInput(Date.now()).slice(0,10)}.json`; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast("Backup exported");
@@ -952,14 +1155,17 @@ $("#importInput").onchange = async e => {
   try {
     const data = JSON.parse(await f.text());
     const incoming = (data.items || []).filter(x => x && x.id && x.code && x.start && x.end);
-    if (!incoming.length) { toast("No entries found in that file."); return; }
+    const inTodos = (data.todos || []).filter(x => x && x.id && x.text), inSeries = (data.series || []).filter(x => x && x.id);
+    if (!incoming.length && !inTodos.length) { toast("No entries found in that file."); return; }
     if (!confirm(`Import ${incoming.length} entries? Entries with the same ID will be replaced.`)) return;
     for (const x of incoming) {
       x.type = TYPES[x.type] ? x.type : "other"; x.outcome = x.outcome || "pending";
       const k = items.findIndex(y => y.id === x.id); if (k >= 0) items[k] = x; else items.push(x);
       await Store.put(x);
     }
-    renderAll(); toast(`Imported ${incoming.length} entries`);
+    for (const t of inTodos) { const k = todos.findIndex(y => y.id === t.id); if (k >= 0) todos[k] = t; else todos.push(t); await Store.put(t, "todos"); }
+    for (const z of inSeries) { const k = series.findIndex(y => y.id === z.id); if (k >= 0) series[k] = z; else series.push(z); await Store.put(z, "series"); }
+    renderAll(); renderTodos(); toast(`Imported ${incoming.length} entries and ${inTodos.length} tasks`);
   } catch { toast("That file isn't a valid backup."); }
 };
 function applyTheme(v){ if (v === "light" || v === "dark") document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; }
@@ -1012,7 +1218,22 @@ let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTime
   const ok = await Store.init();
   if (!ok) $("#banner").innerHTML = `<div class="warn-banner">This browser is blocking storage, so entries will be lost when you close the tab. Export a backup before leaving, or open the page in a normal (non-private) window.</div>`;
   try { items = await Store.all(); } catch { items = []; }
-  items.forEach(i => { if (!TYPES[i.type]) i.type = "other"; });
+  try { todos = await Store.all("todos"); } catch { todos = []; }
+  try { series = await Store.all("series"); } catch { series = []; }
+  // Migrate older entries: NMR/analysis becomes "other", and reactions without a colour get one.
+  let counter = 0; const byCode = {};
+  items.slice().sort((a,b) => (a.created||a.start) - (b.created||b.start)).forEach(i => {
+    let changed = false;
+    if (!TYPES[i.type]) { i.type = "other"; changed = true; }
+    if (i.type === "reaction" && !hasColor(i)) {
+      const k = i.code.trim().toLowerCase();
+      i.color = byCode[k] ?? (counter++ % RAIN); changed = true;
+    }
+    if (i.type === "reaction") byCode[i.code.trim().toLowerCase()] = i.color;
+    if (changed) Store.put(i);
+  });
+  series.forEach(topUpSeries);
+  renderTodos();
   lastSig = (() => { const { running, awaiting } = lists(Date.now()); return running.map(i => i.id).join() + "|" + awaiting.map(i => i.id).join(); })();
   renderAll(); scrollToFocus();
   let lastMinute = new Date().getMinutes();
