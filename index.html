@@ -818,6 +818,8 @@ function renderEditor(i){
     ${coloured(i) ? `<div class="swatches" id="pColor" aria-label="Colour">${Array.from({length: RAIN}, (_, k) => `<button class="sw" style="--edge:var(--r${k})" data-c="${k}" aria-pressed="${i.color === k}" aria-label="Colour ${k + 1}"></button>`).join("")}</div>` : ""}
     ${i.type === "other" ? "" : `<div class="seg" id="pOutcome" aria-label="Result">${seg}</div>`}
     ${live}
+    <div class="scheme-drop ${i.scheme ? "has" : ""}" id="pScheme" tabindex="0">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}" data-zoom="${esc(i.code)}">` : "Copy from ChemDraw, then paste here (Ctrl/Cmd + V). You can also drop or choose an image."}</div>
+    <div class="row" style="margin-top:8px"><button id="pSchemePick">Choose image</button>${i.scheme ? `<button id="pSchemeRemove" style="color:var(--fail)">Remove scheme</button>` : ""}</div>
     <div class="group">
       <div class="g-row"><span>Start</span><input type="datetime-local" id="pStart" value="${toInput(i.start)}"></div>
       <div class="g-row"><span>End</span><input type="datetime-local" id="pEnd" value="${toInput(i.end)}"></div>
@@ -827,8 +829,6 @@ function renderEditor(i){
         <button data-a="now">End now</button><button data-a="overnight">Overnight</button>
       </div></div>
     </div>
-    <div class="scheme-drop ${i.scheme ? "has" : ""}" id="pScheme" tabindex="0">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}" data-zoom="${esc(i.code)}">` : "Copy from ChemDraw, then paste here (Ctrl/Cmd + V). You can also drop or choose an image."}</div>
-    <div class="row" style="margin-top:8px"><button id="pSchemePick">Choose image</button>${i.scheme ? `<button id="pSchemeRemove" style="color:var(--fail)">Remove scheme</button>` : ""}</div>
     <div class="group">
       <div class="g-col"><label for="pCond">Conditions</label><textarea id="pCond" rows="2" placeholder="e.g. Pd(PPh3)4, K2CO3, dioxane/H2O, 90 °C">${esc(i.conditions)}</textarea></div>
       <div class="g-col"><label for="pNotes">Notes</label><textarea id="pNotes" rows="3" placeholder="TLC, observations, yield">${esc(i.notes)}</textarea></div>
