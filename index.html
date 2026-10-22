@@ -312,6 +312,21 @@ dialog form{display:flex;flex-direction:column;gap:14px}
   .bar{padding:0 12px}
   .bar .primary{padding:8px 12px}
 }
+/* ---------- Enlarged scheme ---------- */
+img[data-zoom]{cursor:zoom-in}
+#lightbox{width:96vw;max-width:96vw;height:92vh;max-height:92vh;margin:auto;padding:0;overflow:hidden;background:#fff;color:#000;border-radius:22px;display:none;flex-direction:column}
+#lightbox[open]{display:flex}
+#lightbox::backdrop{background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.lb-bar{display:flex;align-items:center;gap:14px;padding:12px 14px 12px 22px;border-bottom:.5px solid rgba(60,60,67,.18);flex:0 0 auto}
+.lb-title{font:700 20px/1.1 var(--font-display);letter-spacing:-.02em}
+.lb-hint{flex:1;font-size:13px;color:rgba(60,60,67,.6)}
+#lightbox .round{background:rgba(118,118,128,.12);color:#000}
+.lb-stage{flex:1 1 auto;min-height:0;overflow:auto;display:grid;place-items:center;padding:20px}
+.lb-stage img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}
+.lb-stage.zoomed{place-items:start}
+.lb-stage.zoomed img{max-width:none;max-height:none;cursor:zoom-out}
+.lb-stage.fixed img{cursor:default}
+
 /* ---------- Weekly summary ---------- */
 .pillbtn{border-radius:999px;position:relative;white-space:nowrap}
 .pillbtn.ready::after{content:"";position:absolute;top:2px;right:2px;width:9px;height:9px;border-radius:50%;background:var(--now);box-shadow:0 0 0 2px var(--bg)}
@@ -435,6 +450,16 @@ dialog.week{width:min(880px,calc(100vw - 24px))}
   </div>
   <div id="wkBody"></div>
   <div class="dlg-foot no-print"><button id="wkCopy">Copy as text</button><button id="wkPrint">Print or save as PDF</button><button class="primary" id="wkClose">Done</button></div>
+</dialog>
+
+<!-- Enlarged scheme -->
+<dialog id="lightbox" aria-label="Enlarged scheme">
+  <div class="lb-bar">
+    <span class="lb-title" id="lbTitle"></span>
+    <span class="lb-hint" id="lbHint"></span>
+    <button class="round" id="lbClose" aria-label="Close">✕</button>
+  </div>
+  <div class="lb-stage" id="lbStage"><img id="lbImg" alt=""></div>
 </dialog>
 
 <!-- Menu -->
@@ -604,7 +629,7 @@ function imageToDataURL(file){
   return new Promise((res, rej) => {
     const url = URL.createObjectURL(file), img = new Image();
     img.onload = () => {
-      const k = Math.min(1, 1400 / img.naturalWidth);
+      const k = Math.min(1, 3200 / img.naturalWidth, 2400 / img.naturalHeight);
       const c = document.createElement("canvas");
       c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
       const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
@@ -737,7 +762,7 @@ function lists(now){
   const awaiting = items.filter(i => i.type === "reaction" && i.outcome === "pending" && i.end <= now && now - i.end < 24 * HOUR).sort((a,b) => b.end - a.end);
   return { running, awaiting };
 }
-function thumb(i){ return i.scheme ? `<span class="thumb"><img src="${i.scheme}" alt=""></span>` : `<span class="thumb empty-thumb"></span>`; }
+function thumb(i){ return i.scheme ? `<span class="thumb"><img src="${i.scheme}" alt="" data-zoom="${esc(i.code)}"></span>` : `<span class="thumb empty-thumb"></span>`; }
 function setGlow(i){ cardWrap.style.setProperty("--glow", i ? edgeOf(i) : "transparent"); }
 function renderHome(){
   const now = Date.now(), { running, awaiting } = lists(now);
@@ -779,7 +804,7 @@ function renderPreview(i){
     <div class="pv-top" ${paint(i)}><span class="pill">${TYPES[i.type]}</span><span class="status ${scls}">${stxt}</span></div>
     <h2 class="pv-code">${esc(i.code)}</h2>
     <p class="pv-label">${esc(i.label) || "&nbsp;"}</p>
-    <div class="scheme-view ${i.scheme ? "" : "none"}">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}">` : "No scheme yet"}</div>
+    <div class="scheme-view ${i.scheme ? "" : "none"}">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}" data-zoom="${esc(i.code)}">` : "No scheme yet"}</div>
     <dl class="facts">
       <div><dt>Start</dt><dd>${fmtWhen(i.start)}</dd></div>
       <div><dt>End</dt><dd>${fmtWhen(i.end)}</dd></div>
@@ -812,7 +837,7 @@ function renderEditor(i){
         <button data-a="now">End now</button><button data-a="overnight">Overnight</button>
       </div></div>
     </div>
-    <div class="scheme-drop ${i.scheme ? "has" : ""}" id="pScheme" tabindex="0">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}">` : "Copy from ChemDraw, then paste here (Ctrl/Cmd + V). You can also drop or choose an image."}</div>
+    <div class="scheme-drop ${i.scheme ? "has" : ""}" id="pScheme" tabindex="0">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}" data-zoom="${esc(i.code)}">` : "Copy from ChemDraw, then paste here (Ctrl/Cmd + V). You can also drop or choose an image."}</div>
     <div class="row" style="margin-top:8px"><button id="pSchemePick">Choose image</button>${i.scheme ? `<button id="pSchemeRemove" style="color:var(--fail)">Remove scheme</button>` : ""}</div>
     <div class="group">
       <div class="g-col"><label for="pCond">Conditions</label><textarea id="pCond" rows="2" placeholder="e.g. Pd(PPh3)4, K2CO3, dioxane/H2O, 90 °C">${esc(i.conditions)}</textarea></div>
@@ -1022,7 +1047,7 @@ function renderWeek(){
       const label = g.runs.map(i => i.label).filter(Boolean).pop() || "";
       const cond = g.runs.map(i => i.conditions).filter(Boolean).pop() || "";
       return `<div class="wk-rx" style="--edge:${edgeOf(last)}">
-        <div class="wk-scheme ${scheme ? "" : "none"}">${scheme ? `<img src="${scheme}" alt="">` : ""}</div>
+        <div class="wk-scheme ${scheme ? "" : "none"}">${scheme ? `<img src="${scheme}" alt="" data-zoom="${esc(last.code)}">` : ""}</div>
         <div style="min-width:0"><div class="wk-code">${esc(last.code)}${label ? ` <span style="font-weight:400;color:var(--muted)">${esc(label)}</span>` : ""}</div>
           <div class="wk-meta">${g.runs.length > 1 ? `${g.runs.length} runs` : "1 run"}, ${dayNames(g.runs)}${cond ? `. ${esc(cond)}` : ""}</div></div>
         <div class="wk-out">${outcomeChips(g.runs)}</div>
@@ -1066,6 +1091,45 @@ $("#wkNext").onclick = () => { wkOffset = Math.max(0, wkOffset - 1); renderWeek(
 $("#wkClose").onclick = () => $("#weekDialog").close();
 $("#wkCopy").onclick = async () => toast(await copyText(weekText()) ? "Summary copied. Paste it into your slides or notes." : "Couldn't copy. Try Print or save as PDF instead.");
 $("#wkPrint").onclick = () => window.print();
+
+/* ---------- Click any scheme to enlarge it ---------- */
+const lb = $("#lightbox"), lbStage = $("#lbStage"), lbImg = $("#lbImg");
+function lbFit(){
+  lbStage.classList.remove("zoomed");
+  // Only offer zoom when the full-size image is bigger than what fits on screen.
+  requestAnimationFrame(() => {
+    const canZoom = lbImg.naturalWidth > lbImg.clientWidth + 4 || lbImg.naturalHeight > lbImg.clientHeight + 4;
+    lbStage.classList.toggle("fixed", !canZoom);
+    $("#lbHint").textContent = canZoom ? "Click the image to see it full size. Esc to close." : "Esc or click outside to close.";
+  });
+}
+function openLightbox(src, title){
+  lbImg.src = src; $("#lbTitle").textContent = title || "Scheme";
+  lb.showModal();
+  if (lbImg.complete) lbFit(); else lbImg.onload = lbFit;
+}
+document.addEventListener("click", e => {
+  const img = e.target.closest?.("img[data-zoom]");
+  if (!img || drag?.active) return;
+  e.preventDefault(); e.stopPropagation();
+  openLightbox(img.src, img.dataset.zoom);
+}, true);
+lbImg.addEventListener("click", e => {
+  if (lbStage.classList.contains("fixed")) return;
+  const zoomed = !lbStage.classList.contains("zoomed");
+  // Zoom in around the point you clicked.
+  const r = lbImg.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+  lbStage.classList.toggle("zoomed", zoomed);
+  if (zoomed) {
+    lbStage.scrollLeft = fx * lbImg.naturalWidth - lbStage.clientWidth / 2;
+    lbStage.scrollTop = fy * lbImg.naturalHeight - lbStage.clientHeight / 2;
+  }
+  $("#lbHint").textContent = zoomed ? "Scroll to move around. Click to fit the screen again." : "Click the image to see it full size. Esc to close.";
+});
+$("#lbClose").onclick = () => lb.close();
+lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });   // click on the dimmed background
+lbStage.addEventListener("click", e => { if (e.target === lbStage) lb.close(); });
+window.addEventListener("resize", () => { if (lb.open && !lbStage.classList.contains("zoomed")) lbFit(); });
 
 function pin(id){
   selectedId = id; hoverId = null; cardKey = "";
