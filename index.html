@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reaction timeline</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚗️</text></svg>">
+<style>
+/* =========================================================
+   Tokens (iOS system palette)
+   ========================================================= */
+:root{
+  color-scheme: light;
+  --bg:#F2F2F7; --surface:#FFFFFF; --surface-2:#F7F7FA; --fill:rgba(118,118,128,.12); --fill-2:rgba(118,118,128,.20);
+  --sep:rgba(60,60,67,.14); --sep-strong:rgba(60,60,67,.26);
+  --text:#000000; --muted:rgba(60,60,67,.62); --faint:rgba(60,60,67,.34);
+  --accent:#007AFF; --now:#FF3B30; --ok:#34C759; --fail:#FF3B30;
+  --c-reaction:#FF9500; --c-workup:#30B0C7; --c-column:#AF52DE; --c-analysis:#007AFF; --c-other:#8E8E93;
+  --shadow:0 1px 2px rgba(0,0,0,.04), 0 10px 36px rgba(0,0,0,.07);
+  --plane-shadow:0 1px 2px rgba(0,0,0,.05), 0 30px 60px -20px rgba(0,0,0,.18);
+  --glass:rgba(242,242,247,.74);
+  --band:repeating-linear-gradient(135deg, transparent 0 6px, rgba(60,60,67,.05) 6px 12px);
+  --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-display:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --font-round:ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --hdr:62px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#000000; --surface:#1C1C1E; --surface-2:#232326; --fill:rgba(118,118,128,.24); --fill-2:rgba(118,118,128,.34);
+    --sep:rgba(84,84,88,.45); --sep-strong:rgba(84,84,88,.75);
+    --text:#FFFFFF; --muted:rgba(235,235,245,.62); --faint:rgba(235,235,245,.3);
+    --accent:#0A84FF; --now:#FF453A; --ok:#30D158; --fail:#FF453A;
+    --c-reaction:#FF9F0A; --c-workup:#40C8E0; --c-column:#BF5AF2; --c-analysis:#0A84FF; --c-other:#98989D;
+    --shadow:0 0 0 1px rgba(255,255,255,.05), 0 10px 36px rgba(0,0,0,.5);
+    --plane-shadow:0 0 0 1px rgba(255,255,255,.06), 0 30px 60px -20px rgba(0,0,0,.8);
+    --glass:rgba(0,0,0,.66);
+    --band:repeating-linear-gradient(135deg, transparent 0 6px, rgba(255,255,255,.04) 6px 12px);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#000000; --surface:#1C1C1E; --surface-2:#232326; --fill:rgba(118,118,128,.24); --fill-2:rgba(118,118,128,.34);
+  --sep:rgba(84,84,88,.45); --sep-strong:rgba(84,84,88,.75);
+  --text:#FFFFFF; --muted:rgba(235,235,245,.62); --faint:rgba(235,235,245,.3);
+  --accent:#0A84FF; --now:#FF453A; --ok:#30D158; --fail:#FF453A;
+  --c-reaction:#FF9F0A; --c-workup:#40C8E0; --c-column:#BF5AF2; --c-analysis:#0A84FF; --c-other:#98989D;
+  --shadow:0 0 0 1px rgba(255,255,255,.05), 0 10px 36px rgba(0,0,0,.5);
+  --plane-shadow:0 0 0 1px rgba(255,255,255,.06), 0 30px 60px -20px rgba(0,0,0,.8);
+  --glass:rgba(0,0,0,.66);
+  --band:repeating-linear-gradient(135deg, transparent 0 6px, rgba(255,255,255,.04) 6px 12px);
+}
+[data-type="reaction"]{--edge:var(--c-reaction)}
+[data-type="workup"]{--edge:var(--c-workup)}
+[data-type="column"]{--edge:var(--c-column)}
+[data-type="analysis"]{--edge:var(--c-analysis)}
+[data-type="other"]{--edge:var(--c-other)}
+
+/* =========================================================
+   Base
+   ========================================================= */
+*,*::before,*::after{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:400 15px/1.4 var(--font);-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+button,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer;border:0;background:var(--fill);border-radius:10px;padding:8px 14px;font-weight:500;line-height:1.2}
+button:hover{background:var(--fill-2)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid color-mix(in srgb, var(--accent) 55%, transparent);outline-offset:2px}
+button.primary{background:var(--accent);color:#fff;font-weight:600}
+button.primary:hover{background:color-mix(in srgb, var(--accent) 88%, #000)}
+button.link{background:transparent;color:var(--accent);padding:6px 4px}
+button.link:hover{opacity:.7}
+input,textarea{width:100%;background:var(--fill);border:0;border-radius:10px;padding:9px 12px}
+textarea{resize:vertical;min-height:44px}
+.num{font-variant-numeric:tabular-nums}
+
+/* =========================================================
+   Header
+   ========================================================= */
+.bar{position:sticky;top:0;z-index:20;height:var(--hdr);display:flex;align-items:center;gap:10px;padding:0 20px;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--sep)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+.daynav{display:flex;align-items:center;gap:6px}
+.daynav h1{font:700 22px/1 var(--font-display);letter-spacing:-.02em;margin:0 0 0 10px;min-width:10ch}
+.round{width:34px;height:34px;padding:0;border-radius:50%;font-size:19px;display:grid;place-items:center}
+.bar .spacer{flex:1}
+.bar .primary{border-radius:999px;padding:9px 16px;white-space:nowrap}
+.bar .round.more{font-size:17px}
+
+/* =========================================================
+   Shell: detail card on the left, 3D timeline on the right
+   ========================================================= */
+.shell{display:grid;grid-template-columns:minmax(340px,410px) minmax(0,1fr);gap:22px;height:calc(100dvh - var(--hdr) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));padding:14px 0 16px 20px}
+body.wide{overflow:hidden}
+
+.card-wrap{position:relative;min-height:0;z-index:2}
+.card-wrap::before,.card-wrap::after{content:"";position:absolute;left:28px;right:28px;height:3px;border-radius:3px;background:var(--glow,transparent);box-shadow:0 0 18px 3px var(--glow,transparent);opacity:.85;pointer-events:none;transition:background .35s, box-shadow .35s}
+.card-wrap::before{top:-1px}
+.card-wrap::after{bottom:-1px}
+.card{height:100%;overflow:auto;background:var(--surface);border-radius:26px;box-shadow:var(--shadow);padding:22px 22px 26px}
+.card::-webkit-scrollbar{width:0}
+
+.stage{position:relative;min-height:0;overflow-y:auto;overflow-x:hidden;perspective:var(--persp,1500px);perspective-origin:0% 8%;padding:6px 0 60px 0;scrollbar-width:thin}
+.plane{transform-origin:0 0;transform:rotateY(var(--tilt,18deg));transform-style:preserve-3d;background:var(--surface);border-radius:24px;box-shadow:var(--plane-shadow);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+
+/* =========================================================
+   Timeline inside the plane
+   ========================================================= */
+.tl{position:relative;display:grid;grid-template-columns:58px 1fr;transform-style:preserve-3d}
+.tl-gutter{position:relative}
+.tl-gutter span{position:absolute;right:10px;transform:translateY(-50%);font:500 12px/1 var(--font);color:var(--muted);font-variant-numeric:tabular-nums}
+.tl-gutter span.band-label{transform:none;font-size:11.5px;line-height:1.15;text-align:right;color:var(--faint)}
+.tl-body{position:relative;transform-style:preserve-3d}
+.tl-band{position:absolute;left:0;right:0;background:var(--band);pointer-events:none}
+.tl-band.first{border-radius:0 24px 0 0}
+.tl-band.last{border-radius:0 0 24px 0}
+.tl-grid,.tl-lanes{position:absolute;left:0;right:0;pointer-events:none}
+.tl-lanes{top:0;bottom:0}
+.slot{position:absolute;left:0;right:0;z-index:2;cursor:copy}
+.tl-now{position:absolute;left:-6px;right:0;height:0;border-top:2px solid var(--now);z-index:6;pointer-events:none}
+.tl-now::before{content:"";position:absolute;left:0;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--now)}
+.tl-now b{position:absolute;right:calc(100% + 4px);top:-8px;color:var(--now);font:600 12px/1 var(--font);font-variant-numeric:tabular-nums;background:var(--surface);padding:2px 4px;border-radius:4px}
+
+.blk{position:absolute;z-index:3;border-radius:10px;background:color-mix(in srgb, var(--edge) 17%, var(--surface));color:color-mix(in srgb, var(--edge) 58%, var(--text));padding:5px 26px 5px 11px;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s}
+.blk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--edge)}
+.blk:hover,.blk.hover{transform:translateZ(26px);box-shadow:0 14px 28px -10px color-mix(in srgb, var(--edge) 55%, transparent)}
+.blk.running{background:color-mix(in srgb, var(--edge) 28%, var(--surface));box-shadow:0 0 0 1.5px var(--edge) inset}
+.blk.running:hover{box-shadow:0 0 0 1.5px var(--edge) inset,0 14px 28px -10px color-mix(in srgb, var(--edge) 55%, transparent)}
+.blk.sel{box-shadow:0 0 0 2px var(--edge),0 0 0 4px color-mix(in srgb, var(--edge) 25%, transparent)}
+.blk.dragging{cursor:grabbing;z-index:9;transform:translateZ(46px);box-shadow:0 0 0 2px var(--edge),0 22px 40px -12px rgba(0,0,0,.35);transition:box-shadow .2s, transform .2s}
+.blk .code{display:block;font:650 15px/1.15 var(--font-display);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk .lbl{display:block;font-size:12.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.85}
+.blk .tm{display:block;font-size:12px;opacity:.7;margin-top:2px;font-variant-numeric:tabular-nums}
+.blk .cont{display:block;font-size:11.5px;opacity:.7}
+.badge{position:absolute;top:5px;right:5px;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;font:700 11px/1 var(--font);color:#fff}
+.badge.ok{background:var(--ok)} .badge.fail{background:var(--fail)}
+.grip{position:absolute;left:0;right:0;bottom:0;height:10px;cursor:ns-resize}
+.grip::after{content:"";position:absolute;left:50%;bottom:3px;width:26px;margin-left:-13px;height:4px;border-radius:2px;background:var(--edge);opacity:0;transition:opacity .2s}
+.blk:hover .grip::after,.blk.sel .grip::after,.blk.dragging .grip::after{opacity:.75}
+@media (hover:none){.grip{height:16px}.grip::after{opacity:.5}}
+.drag-tip{position:absolute;z-index:10;pointer-events:none;background:var(--text);color:var(--surface);font:600 13px/1 var(--font);padding:6px 9px;border-radius:8px;white-space:nowrap;font-variant-numeric:tabular-nums;transform:translateZ(60px)}
+body.is-dragging,body.is-dragging *{cursor:grabbing !important}
+body.is-resizing,body.is-resizing *{cursor:ns-resize !important}
+
+/* =========================================================
+   Detail card contents
+   ========================================================= */
+.large-title{font:700 30px/1.1 var(--font-display);letter-spacing:-.025em;margin:2px 0 4px}
+.card-sub{color:var(--muted);margin:0 0 18px}
+.section-title{font:600 13px/1.2 var(--font);color:var(--muted);margin:22px 4px 8px}
+.empty{padding:28px 6px;color:var(--muted)}
+.empty p{margin:0 0 6px}
+.empty .empty-title{font:600 20px/1.2 var(--font-display);color:var(--text);margin-bottom:8px}
+
+.run-list{display:flex;flex-direction:column;gap:10px}
+.run-row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;grid-template-rows:auto auto;gap:6px 12px;align-items:center;text-align:left;width:100%;padding:12px;border-radius:16px;background:var(--surface-2);font-weight:400}
+.run-row:hover{background:var(--fill)}
+.thumb{grid-row:1 / span 2;width:52px;height:52px;border-radius:12px;background:#fff;display:grid;place-items:center;overflow:hidden;box-shadow:0 0 0 .5px var(--sep)}
+.thumb img{max-width:100%;max-height:100%;object-fit:contain}
+.thumb.empty-thumb{background:color-mix(in srgb, var(--edge) 18%, var(--surface));box-shadow:none}
+.thumb.empty-thumb::after{content:"";width:14px;height:14px;border-radius:50%;background:var(--edge)}
+.rr-code{display:block;font:650 17px/1.15 var(--font-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rr-sub{display:block;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rr-time{text-align:right}
+.cd{display:block;font:300 30px/1 var(--font-round);font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:var(--edge)}
+.cd.over{color:var(--now)}
+.rr-cap{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+.bar-track{grid-column:2 / 4;height:5px;border-radius:3px;background:var(--fill);overflow:hidden}
+.bar-track i{display:block;height:100%;border-radius:3px;background:var(--edge)}
+.bar-track i.over{background:var(--now)}
+.wait-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--surface-2);cursor:pointer}
+.wait-row button{font-weight:600;padding:7px 12px}
+.btn-ok{color:var(--ok)} .btn-fail{color:var(--fail)}
+
+/* preview */
+.pv-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--font);padding:6px 10px;border-radius:999px;background:color-mix(in srgb, var(--edge) 16%, transparent);color:color-mix(in srgb, var(--edge) 70%, var(--text))}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--edge)}
+.status{font:600 12.5px/1 var(--font);padding:6px 10px;border-radius:999px;background:var(--fill);color:var(--muted)}
+.status.running{background:color-mix(in srgb, var(--edge) 16%, transparent);color:color-mix(in srgb, var(--edge) 70%, var(--text))}
+.status.ok{background:color-mix(in srgb, var(--ok) 16%, transparent);color:var(--ok)}
+.status.fail{background:color-mix(in srgb, var(--fail) 16%, transparent);color:var(--fail)}
+.pv-code{font:700 34px/1.05 var(--font-display);letter-spacing:-.03em;margin:0;word-break:break-word}
+.pv-label{font-size:17px;color:var(--muted);margin:4px 0 16px}
+.scheme-view{background:#fff;border-radius:16px;padding:10px;box-shadow:0 0 0 .5px var(--sep);display:grid;place-items:center;min-height:120px}
+.scheme-view img{max-width:100%;max-height:300px;display:block}
+.scheme-view.none{background:var(--surface-2);box-shadow:none;color:var(--faint);font-size:14px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);margin:16px 0 0;border-radius:14px;background:var(--surface-2);overflow:hidden}
+.facts div{padding:10px 12px}
+.facts div+div{border-left:.5px solid var(--sep)}
+.facts dt{font-size:12px;color:var(--muted)}
+.facts dd{margin:2px 0 0;font:600 16px/1.2 var(--font-display);font-variant-numeric:tabular-nums}
+.pv-live{margin-top:16px;padding:14px;border-radius:16px;background:var(--surface-2)}
+.pv-live .cd{font-size:46px}
+.pv-live .bar-track{margin-top:10px}
+.pv-text{margin-top:16px}
+.pv-text h4{font:600 13px/1.2 var(--font);color:var(--muted);margin:0 0 4px}
+.pv-text p{margin:0;white-space:pre-wrap}
+.hint{margin-top:18px;font-size:13px;color:var(--faint)}
+
+/* editor */
+.ed-top{display:flex;justify-content:space-between;align-items:center;margin:-6px -4px 8px}
+.ed-top .strong{font-weight:600}
+.title-input{font:700 30px/1.1 var(--font-display);letter-spacing:-.025em;background:transparent;padding:4px 2px}
+.title-input:hover{background:var(--fill)}
+.sub-input{font-size:17px;color:var(--muted);background:transparent;padding:4px 2px;margin-bottom:6px}
+.sub-input:hover{background:var(--fill)}
+.group{background:var(--surface-2);border-radius:14px;padding:4px 0;margin-top:10px}
+.g-row{display:flex;align-items:center;gap:10px;padding:8px 14px;min-height:44px}
+.g-row+.g-row{border-top:.5px solid var(--sep)}
+.g-row > span{flex:0 0 52px;color:var(--text)}
+.g-row input[type="datetime-local"]{background:var(--fill);padding:6px 8px;font-size:14px;min-width:0;flex:1}
+.g-col{display:flex;flex-direction:column;gap:6px;padding:10px 14px}
+.g-col+.g-col,.g-row+.g-col,.g-col+.g-row{border-top:.5px solid var(--sep)}
+.g-col label{font-size:13px;color:var(--muted)}
+.g-col textarea{background:transparent;padding:2px 0;border-radius:0;min-height:40px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:7px 12px;font-size:14px;border-radius:999px}
+.chips.types button[aria-pressed="true"]{background:var(--edge);color:#fff}
+.chips.dur button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.chips.small button{font-size:13px;padding:6px 10px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px;border-radius:10px;background:var(--fill);margin-top:10px}
+.seg button{background:transparent;border-radius:8px;padding:8px 4px;font-weight:600;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg button[aria-pressed="true"][data-v="ok"]{background:var(--ok);color:#fff}
+.seg button[aria-pressed="true"][data-v="fail"]{background:var(--fail);color:#fff}
+.scheme-drop{margin-top:10px;min-height:120px;border:1.5px dashed var(--sep-strong);border-radius:14px;display:grid;place-items:center;text-align:center;padding:12px;color:var(--muted);font-size:13.5px;cursor:pointer}
+.scheme-drop.has{background:#fff;border:0;box-shadow:0 0 0 .5px var(--sep);padding:8px}
+.scheme-drop img{max-width:100%;max-height:260px;display:block}
+.scheme-drop.drag{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, transparent)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.note{font-size:12.5px;color:var(--muted)}
+.list-btns{background:var(--surface-2);border-radius:14px;margin-top:18px;overflow:hidden}
+.list-btns button{display:block;width:100%;text-align:left;background:transparent;border-radius:0;padding:13px 14px;color:var(--accent);font-weight:500}
+.list-btns button+button{border-top:.5px solid var(--sep)}
+.list-btns button:hover{background:var(--fill)}
+.list-btns .danger{color:var(--fail)}
+
+/* =========================================================
+   Dialogs & toast
+   ========================================================= */
+dialog{border:0;border-radius:22px;background:var(--surface);color:var(--text);padding:22px;width:min(470px,calc(100vw - 24px));max-height:calc(100dvh - 40px);box-shadow:0 30px 80px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(0,0,0,.32);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+dialog h2{font:700 24px/1.1 var(--font-display);letter-spacing:-.02em;margin:0 0 16px}
+dialog form{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+.field > input,.field > .row{color:var(--text);font-size:15px}
+.dlg-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+#nCode{font:650 20px/1.1 var(--font-display)}
+.menu-list{display:flex;flex-direction:column;gap:8px}
+.menu-list > button{text-align:left}
+#toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(8px);background:color-mix(in srgb, var(--text) 88%, transparent);color:var(--surface);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);padding:11px 16px;border-radius:999px;font-size:14px;z-index:50;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s}
+#toast.show{opacity:1;transform:translateX(-50%);pointer-events:auto}
+#toast button{background:transparent;color:var(--accent);font-weight:700;padding:0 0 0 12px}
+.warn-banner{margin:10px 20px 0;padding:10px 14px;border-radius:12px;background:color-mix(in srgb, var(--c-reaction) 18%, var(--surface));font-size:14px}
+
+/* =========================================================
+   Narrow screens: flat timeline, card above it
+   ========================================================= */
+@media (max-width: 900px){
+  .shell{grid-template-columns:1fr;height:auto;padding:12px 12px 32px}
+  .card{height:auto;overflow:visible}
+  .stage{overflow:auto hidden;perspective:none;padding:0}
+  .plane{transform:none}
+  .daynav h1{font-size:19px;margin-left:6px}
+  .bar{padding:0 12px}
+  .bar .primary{padding:8px 12px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <nav class="daynav" aria-label="Day">
+    <button class="round" id="prevDay" aria-label="Previous day">‹</button>
+    <button id="todayBtn" style="border-radius:999px">Today</button>
+    <button class="round" id="nextDay" aria-label="Next day">›</button>
+    <h1 id="dayLabel"></h1>
+  </nav>
+  <div class="spacer"></div>
+  <button class="primary" id="newBtn">New entry</button>
+  <button class="round more" id="menuBtn" aria-label="Menu">⋯</button>
+</header>
+
+<div id="banner"></div>
+
+<main class="shell">
+  <aside class="card-wrap" id="cardWrap" aria-live="polite"><div class="card" id="card"></div></aside>
+  <section class="stage" id="stage" aria-label="Day timeline"><div class="plane" id="plane"></div></section>
+</main>
+
+<!-- New entry -->
+<dialog id="newDialog">
+  <form id="newForm">
+    <h2>New entry</h2>
+    <label class="field">Code
+      <input id="nCode" list="codeList" autofocus required autocomplete="off" placeholder="DMC-46-A">
+    </label>
+    <label class="field">Description
+      <input id="nLabel" autocomplete="off" placeholder="Optional, e.g. Suzuki">
+    </label>
+    <div class="field">Type<div class="chips types" id="nType"></div></div>
+    <div class="field">Start
+      <div class="row"><input type="datetime-local" id="nStart" style="flex:1"><button type="button" id="nNow">Now</button></div>
+    </div>
+    <div class="field">Duration
+      <div class="chips dur" id="nDur"></div>
+      <input type="datetime-local" id="nEnd" hidden aria-label="End time">
+    </div>
+    <div class="field">Scheme
+      <div class="scheme-drop" id="nScheme" tabindex="0">Paste (Ctrl/Cmd + V) or drop an image. Optional.</div>
+      <span class="note" id="nSchemeNote"></span>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" id="nCancel">Cancel</button>
+      <button type="submit" class="primary">Add to timeline</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Menu -->
+<dialog id="menuDialog">
+  <h2>Data and display</h2>
+  <div class="menu-list">
+    <button id="exportBtn">Export backup (.json)</button>
+    <button id="importBtn">Import backup</button>
+    <input type="file" id="importInput" accept="application/json,.json" hidden>
+    <div class="field" style="margin-top:10px">Appearance
+      <div class="seg" id="themeChips" style="margin-top:4px">
+        <button data-v="system">System</button><button data-v="light">Light</button><button data-v="dark">Dark</button>
+      </div>
+    </div>
+    <p class="note">Entries are saved in this browser on this device. Export a backup regularly, and use Import to move them to another computer.</p>
+    <div class="dlg-foot"><button id="menuClose">Close</button></div>
+  </div>
+</dialog>
+
+<datalist id="codeList"></datalist>
+<input type="file" id="schemeFile" accept="image/*" hidden>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+"use strict";
+
+/* ================= Storage layer =================
+   Everything goes through Store. A Google Sheets backend later only needs
+   another object with the same methods. Same database as v1, so existing entries carry over. */
+const Store = (() => {
+  const DB = "reaction-timeline", VER = 1, OS = "items";
+  let dbp = null, memory = null;
+  function open(){
+    if (!dbp) dbp = new Promise((res, rej) => {
+      try {
+        const r = indexedDB.open(DB, VER);
+        r.onupgradeneeded = () => r.result.createObjectStore(OS, { keyPath: "id" });
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      } catch (e) { rej(e); }
+    });
+    return dbp;
+  }
+  async function tx(mode, fn){
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction(OS, mode);
+      const req = fn(t.objectStore(OS));
+      t.oncomplete = () => res(req ? req.result : undefined);
+      t.onerror = () => rej(t.error);
+    });
+  }
+  return {
+    async init(){ try { await open(); return true; } catch { memory = new Map(); return false; } },
+    async all(){ return memory ? [...memory.values()] : tx("readonly", s => s.getAll()); },
+    async put(item){ return memory ? memory.set(item.id, item) : tx("readwrite", s => s.put(item)); },
+    async remove(id){ return memory ? memory.delete(id) : tx("readwrite", s => s.delete(id)); },
+  };
+})();
+
+/* ================= Constants & helpers ================= */
+const MIN = 60000, HOUR = 60 * MIN;
+const TYPES = { reaction: "Reaction", workup: "Workup", column: "Column", analysis: "NMR / analysis", other: "Meeting / other" };
+const DURS = [["30m","30 min"],["1h","1 h"],["2h","2 h"],["4h","4 h"],["overnight","Overnight"],["custom","Custom"]];
+const DAY_START = 7 * 60, DAY_END = 19 * 60;
+const EARLY_H = 46, SLOT_H = 32, LATE_H = 66, GUTTER = 58, MIN_LANE_W = 150;
+const MAIN_H = (DAY_END - DAY_START) / 30 * SLOT_H;
+const TOTAL_H = EARLY_H + MAIN_H + LATE_H;
+const TILT = 18, PERSP = 1500;               // keep in step with the CSS variables
+const SNAP = 15;                             // minutes
+
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, "0");
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+function startOfDay(ms){ const d = new Date(ms); d.setHours(0,0,0,0); return d.getTime(); }
+function addDays(ms, n){ const d = new Date(ms); d.setDate(d.getDate() + n); return d.getTime(); }
+function atMinute(day, m){ const d = new Date(day); d.setHours(0, m, 0, 0); return d.getTime(); }
+function fmtTime(ms){ const d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+function fmtDay(ms){ return new Date(ms).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" }); }
+function fmtWhen(ms){
+  const today = startOfDay(Date.now()), d = startOfDay(ms);
+  if (d === today) return fmtTime(ms);
+  if (d === addDays(today, 1)) return "tomorrow " + fmtTime(ms);
+  if (d === addDays(today, -1)) return "yesterday " + fmtTime(ms);
+  return new Date(ms).toLocaleDateString("en-AU", { weekday: "short" }) + " " + fmtTime(ms);
+}
+function toInput(ms){ const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function fromInput(v){ if (!v) return null; const t = new Date(v).getTime(); return isNaN(t) ? null : t; }
+function clock(ms){ ms = Math.max(0, ms); const h = Math.floor(ms / HOUR), m = Math.floor(ms % HOUR / MIN), s = Math.floor(ms % MIN / 1000); return `${h}:${pad(m)}:${pad(s)}`; }
+function span(ms){ ms = Math.max(0, ms); const h = Math.floor(ms / HOUR), m = Math.round(ms % HOUR / MIN); return h ? `${h} h ${m ? m + " min" : ""}`.trim() : `${m} min`; }
+function overnightEnd(start){ const d = new Date(start); if (d.getHours() >= 6) d.setDate(d.getDate() + 1); d.setHours(9,0,0,0); return d.getTime(); }
+function roundTo(ms, mins){ const step = mins * MIN; return Math.round(ms / step) * step; }
+function endFor(dur, start, customEnd){
+  switch (dur){
+    case "30m": return start + 30 * MIN;
+    case "1h": return start + HOUR;
+    case "2h": return start + 2 * HOUR;
+    case "4h": return start + 4 * HOUR;
+    case "overnight": return overnightEnd(start);
+    default: return customEnd && customEnd > start ? customEnd : start + HOUR;
+  }
+}
+function toast(msg, undo){
+  const t = $("#toast");
+  t.innerHTML = esc(msg) + (undo ? `<button type="button">Undo</button>` : "");
+  if (undo) t.querySelector("button").onclick = () => { undo(); t.classList.remove("show"); };
+  t.classList.add("show"); clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), undo ? 6000 : 2600);
+}
+function lsGet(k){ try { return localStorage.getItem(k); } catch { return null; } }
+function lsSet(k, v){ try { localStorage.setItem(k, v); } catch {} }
+const flatMQ = matchMedia("(max-width: 900px)");
+const isFlat = () => flatMQ.matches;
+const isRunning = (i, now = Date.now()) => i.start <= now && i.end > now;
+
+/* ================= State ================= */
+let items = [];
+let viewDay = startOfDay(Date.now());
+let selectedId = null;      // entry pinned in the card for editing
+let hoverId = null;         // entry previewed in the card while hovered
+let drag = null, suppressClick = false;
+const byId = id => items.find(i => i.id === id);
+const saveTimers = {};
+function save(item, now = false){
+  clearTimeout(saveTimers[item.id]);
+  const go = () => Store.put(item).catch(() => toast("Couldn't save. Export a backup now."));
+  if (now) go(); else saveTimers[item.id] = setTimeout(go, 300);
+}
+
+/* ================= Images ================= */
+function imageToDataURL(file){
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1400 / img.naturalWidth);
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+      g.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL("image/png"));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Not an image")); };
+    img.src = url;
+  });
+}
+function imageFromClipboard(e){
+  for (const it of e.clipboardData?.items || []) if (it.kind === "file" && it.type.startsWith("image/")) return it.getAsFile();
+  return null;
+}
+function latestSchemeFor(code, exceptId){
+  const c = code.trim().toLowerCase(); if (!c) return null;
+  return items.filter(i => i.id !== exceptId && i.scheme && i.code.trim().toLowerCase() === c).sort((a,b) => b.start - a.start)[0]?.scheme || null;
+}
+
+/* ================= Geometry ================= */
+function minuteOfDay(ms, day, next){
+  if (ms <= day) return 0;
+  if (ms >= next) return 1440;
+  const d = new Date(ms); return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60;
+}
+function yOf(t){
+  if (t <= DAY_START) return t / DAY_START * EARLY_H;
+  if (t <= DAY_END) return EARLY_H + (t - DAY_START) / 30 * SLOT_H;
+  return EARLY_H + MAIN_H + (t - DAY_END) / (1440 - DAY_END) * LATE_H;
+}
+
+/* ================= Timeline plane ================= */
+const stage = $("#stage"), plane = $("#plane");
+function renderPlane(){
+  if (drag && drag.active) return;
+  const day = viewDay, next = addDays(day, 1), now = Date.now();
+  $("#dayLabel").textContent = fmtDay(day);
+  $("#todayBtn").disabled = day === startOfDay(now);
+
+  const rows = items.filter(i => i.start < next && i.end > day).map(i => {
+    const y1 = yOf(minuteOfDay(i.start, day, next));
+    return { i, y1, y2: Math.max(yOf(minuteOfDay(i.end, day, next)), y1 + 26) };
+  }).sort((a, b) => a.y1 - b.y1 || b.y2 - a.y2);
+  const lanes = [];
+  for (const r of rows) {
+    let k = lanes.findIndex(end => end <= r.y1 + 0.5);
+    if (k < 0) { k = lanes.length; lanes.push(0); }
+    lanes[k] = r.y2; r.lane = k;
+  }
+  const laneCount = Math.max(lanes.length + 1, 4);
+
+  // Size the plane so that, once tilted, its far edge lands near the right side of the stage.
+  const S = stage.clientWidth - 16;
+  let W = S;
+  if (!isFlat()) {
+    const a = TILT * Math.PI / 180, denom = PERSP * Math.cos(a) - S * Math.sin(a);
+    W = denom > 0 ? Math.min(S * 2.2, S * PERSP / denom) : S * 2.2;
+  }
+  const laneW = Math.max(MIN_LANE_W, Math.floor((W - GUTTER) / laneCount));
+  const bodyW = laneW * laneCount;
+
+  let gutter = `<span class="band-label" style="top:${EARLY_H/2 - 7}px">Early</span>`;
+  for (let t = DAY_START; t <= DAY_END; t += 60) gutter += `<span style="top:${yOf(t)}px">${pad(t/60)}:00</span>`;
+  gutter += `<span class="band-label" style="top:${EARLY_H + MAIN_H + 12}px">Over-<br>night</span>`;
+
+  const bands = `<div class="tl-band first" style="top:0;height:${EARLY_H}px"></div>
+    <div class="tl-band last" style="top:${EARLY_H+MAIN_H}px;height:${LATE_H}px;border-top:.5px solid var(--sep-strong)"></div>`;
+  const grid = `<div class="tl-grid" style="top:${EARLY_H}px;height:${MAIN_H}px;background:
+      repeating-linear-gradient(to bottom, var(--sep-strong) 0 .5px, transparent .5px ${SLOT_H}px, var(--sep) ${SLOT_H}px ${SLOT_H+.5}px, transparent ${SLOT_H+.5}px ${SLOT_H*2}px)"></div>`;
+  const laneLines = `<div class="tl-lanes" style="background:repeating-linear-gradient(to right, var(--sep) 0 .5px, transparent .5px ${laneW}px)"></div>`;
+
+  // Invisible 15-minute slots: used for clicking to add, and for working out times while dragging on the tilted plane.
+  let slots = "";
+  for (let m = 0; m < 1440; m += SNAP) slots += `<div class="slot" data-m="${m}" style="top:${yOf(m)}px;height:${yOf(m+SNAP)-yOf(m)}px"></div>`;
+
+  const blocks = rows.map(({ i, y1, y2, lane }) => {
+    const h = y2 - y1, before = i.start < day, after = i.end > next;
+    let inner = `<span class="code">${esc(i.code)}</span>`;
+    if (h >= 42) inner += `<span class="lbl">${esc(i.label || TYPES[i.type])}</span>`;
+    if (h >= 60) inner += `<span class="tm">${before ? fmtWhen(i.start) : fmtTime(i.start)} – ${after ? fmtWhen(i.end) : fmtTime(i.end)}</span>`;
+    else if (h >= 48 && (before || after)) inner += `<span class="cont">${before ? "from " + fmtWhen(i.start) : "until " + fmtWhen(i.end)}</span>`;
+    const badge = i.outcome === "ok" ? `<span class="badge ok" aria-label="Worked">✓</span>` : i.outcome === "fail" ? `<span class="badge fail" aria-label="Failed">✗</span>` : "";
+    const grip = after ? "" : `<span class="grip" aria-hidden="true"></span>`;
+    const cls = ["blk", isRunning(i, now) && "running", i.id === selectedId && "sel", i.id === hoverId && "hover"].filter(Boolean).join(" ");
+    return `<div class="${cls}" data-type="${i.type}" data-id="${i.id}" tabindex="0" role="button"
+      aria-label="${esc(i.code)}, ${fmtTime(i.start)} to ${fmtTime(i.end)}. Arrow keys move it, Shift + arrow keys change the end time."
+      style="top:${y1+1}px;height:${h-2}px;left:${lane*laneW+4}px;width:${laneW-8}px">${inner}${badge}${grip}</div>`;
+  }).join("");
+
+  const nowLine = day === startOfDay(now) ? `<div class="tl-now" style="top:${yOf(minuteOfDay(now, day, next))}px"><b>${fmtTime(now)}</b></div>` : "";
+
+  plane.style.width = (GUTTER + bodyW) + "px";
+  plane.innerHTML = `<div class="tl" style="height:${TOTAL_H}px">
+      <div class="tl-gutter">${gutter}</div>
+      <div class="tl-body" id="tlBody">${bands}${grid}${laneLines}${slots}${blocks}${nowLine}</div>
+    </div>`;
+}
+function scrollToFocus(){
+  if (isFlat()) return;
+  const now = Date.now(), today = startOfDay(now);
+  const t = viewDay === today ? minuteOfDay(now, today, addDays(today, 1)) : 8 * 60;
+  stage.scrollTop = Math.max(0, yOf(t) - stage.clientHeight * 0.3);
+}
+
+/* ================= Detail card ================= */
+const card = $("#card"), cardWrap = $("#cardWrap");
+let cardKey = "";
+const isEditing = () => !!(card.contains(document.activeElement) && document.activeElement.matches("input, textarea"));
+function shownState(){
+  if (hoverId && hoverId !== selectedId && byId(hoverId)) return { mode: "preview", id: hoverId };
+  if (selectedId && byId(selectedId)) return { mode: "edit", id: selectedId };
+  return { mode: "home" };
+}
+function renderCard(force){
+  const st = shownState(), key = st.mode + ":" + (st.id || "");
+  if (!force && key === cardKey) return;
+  if (force && st.mode === "edit" && key === cardKey && isEditing()) return;
+  cardKey = key;
+  if (st.mode === "home") renderHome();
+  else if (st.mode === "preview") renderPreview(byId(st.id));
+  else renderEditor(byId(st.id));
+  tick(true);
+}
+function lists(now){
+  const running = items.filter(i => isRunning(i, now)).sort((a,b) => a.end - b.end);
+  const awaiting = items.filter(i => i.type === "reaction" && i.outcome === "pending" && i.end <= now && now - i.end < 24 * HOUR).sort((a,b) => b.end - a.end);
+  return { running, awaiting };
+}
+function thumb(i){ return i.scheme ? `<span class="thumb"><img src="${i.scheme}" alt=""></span>` : `<span class="thumb empty-thumb"></span>`; }
+function setGlow(type){
+  if (type) cardWrap.dataset.type = type; else delete cardWrap.dataset.type;
+  cardWrap.style.setProperty("--glow", type ? "var(--edge)" : "transparent");
+}
+function renderHome(){
+  const now = Date.now(), { running, awaiting } = lists(now);
+  setGlow(running[0]?.type);
+  let html = `<h2 class="large-title">Running now</h2>`;
+  if (!running.length && !awaiting.length) {
+    html += `<div class="empty"><p class="empty-title">Nothing running</p>
+      <p>Hover over a block on the timeline to see its details here.</p>
+      <p>To start something, press New entry or click an empty spot on the timeline.</p></div>`;
+  } else {
+    html += `<p class="card-sub">${running.length ? `${running.length} on the go` : "Nothing running"}</p>`;
+    if (running.length) html += `<div class="run-list">` + running.map(i => `
+      <button class="run-row" data-type="${i.type}" data-open="${i.id}">
+        ${thumb(i)}
+        <span style="min-width:0"><span class="rr-code">${esc(i.code)}</span><span class="rr-sub">${esc(i.label || TYPES[i.type])}</span></span>
+        <span class="rr-time"><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span></span>
+        <span class="bar-track"><i data-bar="${i.id}"></i></span>
+      </button>`).join("") + `</div>`;
+    if (awaiting.length) html += `<h3 class="section-title">Finished, waiting for a result</h3><div class="run-list">` + awaiting.map(i => `
+      <div class="wait-row" data-type="${i.type}" data-open="${i.id}">
+        <span style="min-width:0"><span class="rr-code">${esc(i.code)}</span><span class="rr-sub">ended ${fmtWhen(i.end)}</span></span>
+        <button class="btn-ok" data-outcome="ok" data-id="${i.id}">✓ Worked</button>
+        <button class="btn-fail" data-outcome="fail" data-id="${i.id}">✗ Failed</button>
+      </div>`).join("") + `</div>`;
+  }
+  card.innerHTML = html;
+}
+function statusOf(i, now){
+  if (i.outcome === "ok") return ["ok", "✓ Worked"];
+  if (i.outcome === "fail") return ["fail", "✗ Failed"];
+  if (isRunning(i, now)) return ["running", "Running"];
+  if (i.start > now) return ["", "Scheduled"];
+  return ["", i.type === "reaction" ? "Waiting for a result" : "Finished"];
+}
+function renderPreview(i){
+  const now = Date.now(), [scls, stxt] = statusOf(i, now);
+  setGlow(i.type);
+  card.innerHTML = `
+    <div class="pv-top" data-type="${i.type}"><span class="pill">${TYPES[i.type]}</span><span class="status ${scls}">${stxt}</span></div>
+    <h2 class="pv-code">${esc(i.code)}</h2>
+    <p class="pv-label">${esc(i.label) || "&nbsp;"}</p>
+    <div class="scheme-view ${i.scheme ? "" : "none"}">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}">` : "No scheme yet"}</div>
+    <dl class="facts">
+      <div><dt>Start</dt><dd>${fmtWhen(i.start)}</dd></div>
+      <div><dt>End</dt><dd>${fmtWhen(i.end)}</dd></div>
+      <div><dt>Length</dt><dd>${span(i.end - i.start)}</dd></div>
+    </dl>
+    ${isRunning(i, now) ? `<div class="pv-live" data-type="${i.type}"><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span><div class="bar-track"><i data-bar="${i.id}"></i></div></div>` : ""}
+    ${i.conditions ? `<div class="pv-text"><h4>Conditions</h4><p>${esc(i.conditions)}</p></div>` : ""}
+    ${i.notes ? `<div class="pv-text"><h4>Notes</h4><p>${esc(i.notes)}</p></div>` : ""}
+    <p class="hint">Click the block to edit it. Drag to move it, or drag its bottom edge to change the length.</p>`;
+}
+function renderEditor(i){
+  setGlow(i.type);
+  const typeChips = Object.entries(TYPES).map(([k, v]) => `<button data-type="${k}" aria-pressed="${i.type === k}">${v}</button>`).join("");
+  const seg = [["pending","Pending"],["ok","✓ Worked"],["fail","✗ Failed"]].map(([v,l]) => `<button data-v="${v}" aria-pressed="${i.outcome === v}">${l}</button>`).join("");
+  const live = isRunning(i) ? `<div class="pv-live" data-type="${i.type}"><span class="cd" data-cd="${i.id}"></span><span class="rr-cap" data-cap="${i.id}"></span><div class="bar-track"><i data-bar="${i.id}"></i></div></div>` : "";
+  card.innerHTML = `
+    <div class="ed-top"><button class="link" id="eBack">‹ Running now</button><button class="link strong" id="eDone">Done</button></div>
+    <input class="title-input" id="pCode" value="${esc(i.code)}" aria-label="Code" autocomplete="off">
+    <input class="sub-input" id="pLabel" value="${esc(i.label)}" placeholder="Add a description" aria-label="Description" autocomplete="off">
+    <div class="chips types" id="pType">${typeChips}</div>
+    <div class="seg" id="pOutcome" aria-label="Result">${seg}</div>
+    ${live}
+    <div class="group">
+      <div class="g-row"><span>Start</span><input type="datetime-local" id="pStart" value="${toInput(i.start)}"></div>
+      <div class="g-row"><span>End</span><input type="datetime-local" id="pEnd" value="${toInput(i.end)}"></div>
+      <div class="g-col"><div class="chips small" id="pQuick">
+        <button data-a="-30">−30 min</button><button data-a="30">+30 min</button><button data-a="60">+1 h</button>
+        <button data-a="now">End now</button><button data-a="overnight">Overnight</button>
+      </div><span class="note">${span(i.end - i.start)}</span></div>
+    </div>
+    <div class="scheme-drop ${i.scheme ? "has" : ""}" id="pScheme" tabindex="0">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}">` : "Copy from ChemDraw, then paste here (Ctrl/Cmd + V). You can also drop or choose an image."}</div>
+    <div class="row" style="margin-top:8px"><button id="pSchemePick">Choose image</button>${i.scheme ? `<button id="pSchemeRemove" style="color:var(--fail)">Remove scheme</button>` : ""}</div>
+    <div class="group">
+      <div class="g-col"><label for="pCond">Conditions</label><textarea id="pCond" rows="2" placeholder="e.g. Pd(PPh3)4, K2CO3, dioxane/H2O, 90 °C">${esc(i.conditions)}</textarea></div>
+      <div class="g-col"><label for="pNotes">Notes</label><textarea id="pNotes" rows="3" placeholder="TLC, observations, yield">${esc(i.notes)}</textarea></div>
+    </div>
+    <div class="list-btns">
+      <button id="pAgain">Run again now</button>
+      <button class="danger" id="pDelete">Delete entry</button>
+    </div>`;
+
+  const upd = (fn, opts = {}) => { fn(i); save(i, opts.now); renderPlane(); if (opts.card) renderCard(true); refreshCodes(); };
+  $("#eBack").onclick = $("#eDone").onclick = unpin;
+  $("#pCode").oninput = e => upd(x => x.code = e.target.value.trim() || "Untitled");
+  $("#pLabel").oninput = e => upd(x => x.label = e.target.value);
+  $("#pCond").oninput = e => upd(x => x.conditions = e.target.value);
+  $("#pNotes").oninput = e => upd(x => x.notes = e.target.value);
+  const redo = () => { cardKey = ""; renderCard(true); };
+  $("#pType").onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => x.type = b.dataset.type, { now: true }); redo(); } };
+  $("#pOutcome").onclick = e => { const b = e.target.closest("button"); if (b) { upd(x => x.outcome = b.dataset.v, { now: true }); redo(); } };
+  $("#pStart").onchange = e => { const t = fromInput(e.target.value); if (t) { upd(x => { const d = x.end - x.start; x.start = t; x.end = t + d; }, { now: true }); redo(); } };
+  $("#pEnd").onchange = e => { const t = fromInput(e.target.value); if (t) { upd(x => x.end = t > x.start ? t : x.start + 30 * MIN, { now: true }); redo(); } };
+  $("#pQuick").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return; const a = b.dataset.a;
+    upd(x => {
+      if (a === "now") x.end = Math.max(Date.now(), x.start + MIN);
+      else if (a === "overnight") x.end = overnightEnd(x.start);
+      else x.end = Math.max(x.start + 15 * MIN, x.end + Number(a) * MIN);
+    }, { now: true });
+    redo();
+  };
+  $("#pSchemePick").onclick = () => pickScheme(i.id);
+  $("#pScheme").onclick = () => { if (!i.scheme) pickScheme(i.id); };
+  const rm = $("#pSchemeRemove"); if (rm) rm.onclick = () => { upd(x => x.scheme = null, { now: true }); redo(); };
+  wireDrop($("#pScheme"), async f => { const s = await imageToDataURL(f); upd(x => x.scheme = s, { now: true }); redo(); toast("Scheme added"); });
+  $("#pAgain").onclick = () => {
+    const start = roundTo(Date.now(), 5), dur = i.end - i.start;
+    const copy = { ...i, id: uid(), start, end: start + dur, outcome: "pending", notes: "", created: Date.now() };
+    items.push(copy); save(copy, true); viewDay = startOfDay(start); pin(copy.id); toast(`Started ${copy.code} again`);
+  };
+  $("#pDelete").onclick = async () => {
+    if (!confirm(`Delete ${i.code}? This can't be undone.`)) return;
+    items = items.filter(x => x.id !== i.id); await Store.remove(i.id); unpin(); refreshCodes(); toast("Entry deleted");
+  };
+}
+function pin(id){
+  selectedId = id; hoverId = null; cardKey = "";
+  renderCard(true); renderPlane();
+  if (isFlat()) cardWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function unpin(){ selectedId = null; cardKey = ""; renderCard(true); renderPlane(); }
+
+card.addEventListener("click", e => {
+  const ob = e.target.closest("[data-outcome]");
+  if (ob) {
+    const i = byId(ob.dataset.id); i.outcome = ob.dataset.outcome; save(i, true);
+    toast(`${i.code} marked as ${i.outcome === "ok" ? "worked" : "failed"}`);
+    renderAll(); return;
+  }
+  const row = e.target.closest("[data-open]");
+  if (row) {
+    const i = byId(row.dataset.open);
+    viewDay = startOfDay(Math.min(Math.max(Date.now(), i.start), i.end - 1));
+    pin(i.id); scrollToFocus();
+  }
+});
+
+/* ---------- Hover preview ---------- */
+let hoverT = null;
+function setHover(id){
+  clearTimeout(hoverT);
+  if (hoverId === id || isEditing()) return;
+  hoverId = id; renderCard();
+}
+plane.addEventListener("pointerover", e => {
+  if (e.pointerType !== "mouse" || drag) return;
+  const b = e.target.closest(".blk"); if (b) setHover(b.dataset.id);
+});
+plane.addEventListener("pointerout", e => {
+  if (e.pointerType !== "mouse" || (drag && drag.active)) return;
+  const b = e.target.closest(".blk"); if (!b) return;
+  const to = e.relatedTarget?.closest?.(".blk");
+  if (to) return;
+  clearTimeout(hoverT);
+  hoverT = setTimeout(() => { hoverId = null; renderCard(); }, 160);
+});
+
+/* ================= Click, keys and drag on the plane ================= */
+function slotAt(x, y){
+  const el = document.elementsFromPoint(x, y).find(n => n.classList?.contains("slot"));
+  return el ? Number(el.dataset.m) : null;
+}
+plane.addEventListener("click", e => {
+  if (suppressClick) { suppressClick = false; return; }
+  const blk = e.target.closest(".blk");
+  if (blk) { pin(blk.dataset.id); return; }
+  const slot = e.target.closest(".slot");
+  if (slot) openNew(atMinute(viewDay, Math.floor(Number(slot.dataset.m) / 30) * 30));
+});
+plane.addEventListener("keydown", e => {
+  if (!e.target.classList.contains("blk")) return;
+  const id = e.target.dataset.id;
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pin(id); return; }
+  if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+  e.preventDefault(); e.stopPropagation();
+  const i = byId(id), step = (e.key === "ArrowUp" ? -SNAP : SNAP) * MIN, orig = { start: i.start, end: i.end };
+  if (e.shiftKey) i.end = Math.max(i.start + SNAP * MIN, i.end + step);
+  else { i.start += step; i.end += step; }
+  commitTimes(i, orig, e.shiftKey ? "resize" : "move");
+  document.querySelector(`.blk[data-id="${id}"]`)?.focus();
+});
+function commitTimes(i, orig, mode){
+  if (i.start === orig.start && i.end === orig.end) { renderPlane(); return; }
+  save(i, true); renderAll();
+  const msg = mode === "resize" ? `${i.code} now ends ${fmtWhen(i.end)} (${span(i.end - i.start)})` : `${i.code} moved to ${fmtWhen(i.start)} – ${fmtWhen(i.end)}`;
+  toast(msg, () => { i.start = orig.start; i.end = orig.end; save(i, true); renderAll(); });
+}
+plane.addEventListener("pointerdown", e => {
+  if (e.button !== 0) return;
+  const blk = e.target.closest(".blk"); if (!blk) return;
+  const i = byId(blk.dataset.id); if (!i) return;
+  drag = {
+    id: i.id, el: blk, pid: e.pointerId, touch: e.pointerType === "touch",
+    mode: e.target.closest(".grip") ? "resize" : "move",
+    x0: e.clientX, y0: e.clientY, m0: slotAt(e.clientX, e.clientY), mLast: null,
+    orig: { start: i.start, end: i.end }, active: false, timer: null, tip: null
+  };
+  // Touch: press and hold to pick a block up, so normal swipes still scroll.
+  if (drag.touch) drag.timer = setTimeout(() => { if (drag && !drag.active) { beginDrag(); navigator.vibrate?.(12); } }, 350);
+});
+function beginDrag(){
+  drag.active = true;
+  drag.el.classList.add("dragging");
+  document.body.classList.add(drag.mode === "resize" ? "is-resizing" : "is-dragging");
+  try { drag.el.setPointerCapture(drag.pid); } catch {}
+  drag.tip = document.createElement("div"); drag.tip.className = "drag-tip";
+  $("#tlBody").appendChild(drag.tip);
+  updateDrag(drag.x0, drag.y0);
+}
+function updateDrag(x, y){
+  const i = byId(drag.id), day = viewDay, next = addDays(day, 1);
+  const m = slotAt(x, y) ?? drag.mLast;
+  if (m != null && drag.m0 != null) {
+    drag.mLast = m;
+    if (drag.mode === "move") {
+      const delta = m - drag.m0;
+      i.start = drag.orig.start + delta * MIN; i.end = drag.orig.end + delta * MIN;
+    } else {
+      i.end = Math.max(i.start + SNAP * MIN, atMinute(day, m + SNAP));
+    }
+  }
+  const y1 = yOf(minuteOfDay(i.start, day, next)), y2 = Math.max(yOf(minuteOfDay(i.end, day, next)), y1 + 26);
+  drag.el.style.top = (y1 + 1) + "px"; drag.el.style.height = (y2 - y1 - 2) + "px";
+  const tm = drag.el.querySelector(".tm");
+  if (tm) tm.textContent = `${i.start < day ? fmtWhen(i.start) : fmtTime(i.start)} – ${i.end > next ? fmtWhen(i.end) : fmtTime(i.end)}`;
+  drag.tip.innerHTML = `${fmtTime(i.start)} – ${fmtTime(i.end)}<span style="opacity:.65;margin-left:10px">${span(i.end - i.start)}</span>`;
+  drag.tip.style.left = drag.el.style.left;
+  drag.tip.style.top = (drag.mode === "resize" ? y2 + 6 : Math.max(0, y1 - 32)) + "px";
+}
+window.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  if (!drag.active) {
+    const moved = Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0);
+    if (drag.touch) { if (moved > 8) { clearTimeout(drag.timer); drag = null; } return; }
+    if (moved < 4) return;
+    beginDrag();
+  }
+  updateDrag(e.clientX, e.clientY);
+});
+document.addEventListener("touchmove", e => { if (drag && drag.active) e.preventDefault(); }, { passive: false });
+function endDrag(e, cancelled){
+  if (!drag || (e && e.pointerId !== drag.pid)) return;
+  clearTimeout(drag.timer);
+  const d = drag; drag = null;
+  document.body.classList.remove("is-dragging", "is-resizing");
+  if (!d.active) return;
+  suppressClick = true; setTimeout(() => { suppressClick = false; }, 0);
+  d.tip?.remove();
+  const i = byId(d.id);
+  if (cancelled) { i.start = d.orig.start; i.end = d.orig.end; renderPlane(); return; }
+  commitTimes(i, d.orig, d.mode);
+}
+window.addEventListener("pointerup", e => endDrag(e, false));
+window.addEventListener("pointercancel", e => endDrag(e, true));
+document.addEventListener("keydown", e => { if (e.key === "Escape" && drag && drag.active) { e.stopImmediatePropagation(); endDrag(null, true); } }, true);
+
+/* ================= Schemes: file pick, drop, paste ================= */
+let pickTarget = null;
+function pickScheme(id){ pickTarget = id; $("#schemeFile").value = ""; $("#schemeFile").click(); }
+$("#schemeFile").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const s = await imageToDataURL(f);
+    if (pickTarget === "new") setNewScheme(s, "");
+    else { const i = byId(pickTarget); if (i) { i.scheme = s; save(i, true); cardKey = ""; renderCard(true); } }
+  } catch { toast("That file isn't an image the browser can read. Try PNG or JPG."); }
+};
+function wireDrop(el, onFile){
+  el.addEventListener("dragover", e => { e.preventDefault(); el.classList.add("drag"); });
+  el.addEventListener("dragleave", () => el.classList.remove("drag"));
+  el.addEventListener("drop", e => {
+    e.preventDefault(); el.classList.remove("drag");
+    const f = [...(e.dataTransfer?.files || [])].find(f => f.type.startsWith("image/"));
+    if (f) onFile(f).catch(() => toast("That file isn't an image the browser can read."));
+  });
+}
+document.addEventListener("paste", async e => {
+  const f = imageFromClipboard(e);
+  if (!f) {
+    const tgt = $("#newDialog").open || selectedId;
+    if (tgt && !e.target.matches?.("input, textarea")) toast("No image on the clipboard. In ChemDraw, select the scheme and copy it, then paste again.");
+    return;
+  }
+  e.preventDefault();
+  try {
+    const s = await imageToDataURL(f);
+    if ($("#newDialog").open) { setNewScheme(s, ""); return; }
+    const i = byId(selectedId);
+    if (i) { i.scheme = s; save(i, true); cardKey = ""; renderCard(true); toast(`Scheme added to ${i.code}`); }
+    else toast("Click an entry to open it first, then paste the scheme.");
+  } catch { toast("Couldn't read that image. Try saving it as PNG and dropping it in."); }
+});
+
+/* ================= New entry dialog ================= */
+const dlg = $("#newDialog");
+let nType = "reaction", nDur = lsGet("rt-dur") || "2h", nScheme = null, nSchemeAuto = false;
+function chipRow(el, entries, current){
+  el.innerHTML = entries.map(([k, v]) => `<button type="button" data-k="${k}" ${el.id === "nType" ? `data-type="${k}"` : ""} aria-pressed="${k === current}">${v}</button>`).join("");
+}
+function setNewScheme(s, note){
+  nScheme = s; nSchemeAuto = !!note;
+  const box = $("#nScheme");
+  box.classList.toggle("has", !!s);
+  box.innerHTML = s ? `<img src="${s}" alt="Scheme preview">` : "Paste (Ctrl/Cmd + V) or drop an image. Optional.";
+  $("#nSchemeNote").textContent = s ? (note || "Scheme attached. Click it to replace.") : "";
+}
+function openNew(startMs){
+  $("#newForm").reset();
+  nType = "reaction";
+  chipRow($("#nType"), Object.entries(TYPES), nType);
+  chipRow($("#nDur"), DURS, nDur);
+  const start = startMs ?? roundTo(Date.now(), 5);
+  $("#nStart").value = toInput(start);
+  $("#nEnd").hidden = nDur !== "custom";
+  $("#nEnd").value = toInput(start + HOUR);
+  setNewScheme(null);
+  dlg.showModal();
+  $("#nCode").focus();
+}
+$("#nType").onclick = e => { const b = e.target.closest("button"); if (!b) return; nType = b.dataset.k; chipRow($("#nType"), Object.entries(TYPES), nType); };
+$("#nDur").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return; nDur = b.dataset.k; lsSet("rt-dur", nDur);
+  chipRow($("#nDur"), DURS, nDur); $("#nEnd").hidden = nDur !== "custom";
+};
+$("#nNow").onclick = () => { $("#nStart").value = toInput(roundTo(Date.now(), 5)); };
+$("#nCode").addEventListener("change", () => {
+  if (nScheme && !nSchemeAuto) return;
+  const s = latestSchemeFor($("#nCode").value);
+  if (s) setNewScheme(s, "Scheme copied from the last run of this code.");
+  else if (nSchemeAuto) setNewScheme(null);
+});
+$("#nScheme").onclick = () => pickScheme("new");
+wireDrop($("#nScheme"), async f => setNewScheme(await imageToDataURL(f), ""));
+$("#nCancel").onclick = () => dlg.close();
+$("#newForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const code = $("#nCode").value.trim(); if (!code) return;
+  const start = fromInput($("#nStart").value) ?? Date.now();
+  const end = endFor(nDur, start, fromInput($("#nEnd").value));
+  const item = { id: uid(), code, label: $("#nLabel").value.trim(), type: nType, start, end, outcome: "pending",
+                 scheme: nScheme, conditions: "", notes: "", created: Date.now() };
+  items.push(item); save(item, true); dlg.close();
+  viewDay = startOfDay(start); refreshCodes(); pin(item.id);
+  toast(`${code} added, ends ${fmtWhen(end)}`);
+});
+
+/* ================= Menu: export / import / theme ================= */
+$("#menuBtn").onclick = () => { markTheme(); $("#menuDialog").showModal(); };
+$("#menuClose").onclick = () => $("#menuDialog").close();
+$("#exportBtn").onclick = () => {
+  const blob = new Blob([JSON.stringify({ app: "reaction-timeline", version: 1, exported: new Date().toISOString(), items }, null, 1)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `reaction-timeline-${toInput(Date.now()).slice(0,10)}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast("Backup exported");
+};
+$("#importBtn").onclick = () => { $("#importInput").value = ""; $("#importInput").click(); };
+$("#importInput").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    const incoming = (data.items || []).filter(x => x && x.id && x.code && x.start && x.end);
+    if (!incoming.length) { toast("No entries found in that file."); return; }
+    if (!confirm(`Import ${incoming.length} entries? Entries with the same ID will be replaced.`)) return;
+    for (const x of incoming) {
+      x.type = TYPES[x.type] ? x.type : "other"; x.outcome = x.outcome || "pending";
+      const k = items.findIndex(y => y.id === x.id); if (k >= 0) items[k] = x; else items.push(x);
+      await Store.put(x);
+    }
+    renderAll(); toast(`Imported ${incoming.length} entries`);
+  } catch { toast("That file isn't a valid backup."); }
+};
+function applyTheme(v){ if (v === "light" || v === "dark") document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; }
+function markTheme(){ const v = lsGet("rt-theme") || "system"; document.querySelectorAll("#themeChips button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === v)); }
+$("#themeChips").onclick = e => { const b = e.target.closest("button"); if (!b) return; lsSet("rt-theme", b.dataset.v); applyTheme(b.dataset.v); markTheme(); };
+applyTheme(lsGet("rt-theme"));
+
+/* ================= Navigation, keys, ticking ================= */
+$("#prevDay").onclick = () => { viewDay = addDays(viewDay, -1); renderPlane(); scrollToFocus(); };
+$("#nextDay").onclick = () => { viewDay = addDays(viewDay, 1); renderPlane(); scrollToFocus(); };
+$("#todayBtn").onclick = () => { viewDay = startOfDay(Date.now()); renderPlane(); scrollToFocus(); };
+$("#newBtn").onclick = () => openNew();
+document.addEventListener("keydown", e => {
+  if (document.querySelector("dialog[open]")) return;
+  if (e.target.matches("input, textarea")) { if (e.key === "Escape") e.target.blur(); return; }
+  if (e.key === "Escape" && selectedId) unpin();
+  else if (e.key === "n" || e.key === "N") { e.preventDefault(); openNew(); }
+  else if (e.key === "ArrowLeft") $("#prevDay").click();
+  else if (e.key === "ArrowRight") $("#nextDay").click();
+});
+function refreshCodes(){
+  const codes = [...new Set(items.slice().sort((a,b) => b.start - a.start).map(i => i.code))].slice(0, 200);
+  $("#codeList").innerHTML = codes.map(c => `<option value="${esc(c)}">`).join("");
+}
+let lastSig = "";
+function tick(skipSig){
+  const now = Date.now();
+  if (!skipSig) {
+    const { running, awaiting } = lists(now);
+    const sig = running.map(i => i.id).join() + "|" + awaiting.map(i => i.id).join();
+    if (sig !== lastSig) { lastSig = sig; renderPlane(); renderCard(true); return; }
+  }
+  card.querySelectorAll("[data-cd]").forEach(el => {
+    const i = byId(el.dataset.cd); if (!i) return;
+    const left = i.end - now;
+    el.textContent = clock(left);
+    el.classList.toggle("over", left <= 0);
+  });
+  card.querySelectorAll("[data-cap]").forEach(el => { const i = byId(el.dataset.cap); if (i) el.textContent = `left, ends ${fmtWhen(i.end)}`; });
+  card.querySelectorAll("[data-bar]").forEach(el => { const i = byId(el.dataset.bar); if (i) el.style.width = Math.min(100, Math.max(0, (now - i.start) / (i.end - i.start) * 100)) + "%"; });
+}
+function renderAll(){ renderPlane(); renderCard(true); refreshCodes(); }
+function applyMode(){ document.body.classList.toggle("wide", !isFlat()); }
+flatMQ.addEventListener("change", () => { applyMode(); renderPlane(); });
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(renderPlane, 120); });
+
+/* ================= Boot ================= */
+(async () => {
+  applyMode();
+  const ok = await Store.init();
+  if (!ok) $("#banner").innerHTML = `<div class="warn-banner">This browser is blocking storage, so entries will be lost when you close the tab. Export a backup before leaving, or open the page in a normal (non-private) window.</div>`;
+  try { items = await Store.all(); } catch { items = []; }
+  items.forEach(i => { if (!TYPES[i.type]) i.type = "other"; });
+  lastSig = (() => { const { running, awaiting } = lists(Date.now()); return running.map(i => i.id).join() + "|" + awaiting.map(i => i.id).join(); })();
+  renderAll(); scrollToFocus();
+  let lastMinute = new Date().getMinutes();
+  setInterval(() => {
+    tick();
+    const m = new Date().getMinutes();
+    if (m !== lastMinute) { lastMinute = m; renderPlane(); }
+  }, 1000);
+})();
+})();
+</script>
+</body>
+</html>
