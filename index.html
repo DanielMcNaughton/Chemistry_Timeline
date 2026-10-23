@@ -132,6 +132,10 @@ body.wide{overflow:hidden}
 .blk.running:hover{box-shadow:0 0 0 1.5px var(--edge) inset,0 14px 28px -10px color-mix(in srgb, var(--edge) 55%, transparent)}
 .blk.sel{box-shadow:0 0 0 2px var(--edge),0 0 0 4px color-mix(in srgb, var(--edge) 25%, transparent)}
 .blk.dragging{cursor:grabbing;z-index:9;transform:translateZ(46px);box-shadow:0 0 0 2px var(--edge),0 22px 40px -12px rgba(0,0,0,.35);transition:box-shadow .2s, transform .2s}
+.blk{display:flex;flex-direction:column}
+.blk-scheme{flex:0 1 auto;min-height:0;margin:6px 0 6px;background:#fff;border-radius:7px;display:grid;place-items:center;overflow:hidden;padding:3px;pointer-events:none}
+.blk-scheme img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.blk.notdone .blk-scheme{opacity:.7}
 .blk .code{display:block;font:650 15px/1.15 var(--font-display);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .blk .lbl{display:block;font-size:12.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.85}
 .blk .tm{display:block;font-size:12px;opacity:.7;margin-top:2px;font-variant-numeric:tabular-nums}
@@ -222,6 +226,11 @@ body.is-resizing,body.is-resizing *{cursor:ns-resize !important}
 .g-row+.g-row{border-top:.5px solid var(--sep)}
 .g-row > span{flex:0 0 52px;color:var(--text)}
 .g-row input[type="datetime-local"]{background:var(--fill);padding:6px 8px;font-size:14px;min-width:0;flex:1}
+.dt{display:flex;gap:6px;flex:1;min-width:0}
+.g-row > .dt{flex:1 1 auto}
+.dt input[type="date"]{flex:1 1 auto;min-width:0;background:var(--fill);border:0;border-radius:10px;padding:7px 8px;font-size:14px}
+.dt select{flex:0 0 auto;background:var(--fill);color:var(--text);border:0;border-radius:10px;padding:7px 8px;font:500 14px/1.2 var(--font);font-variant-numeric:tabular-nums;cursor:pointer}
+.dt select:focus-visible{outline:3px solid color-mix(in srgb, var(--accent) 55%, transparent);outline-offset:2px}
 .g-col{display:flex;flex-direction:column;gap:6px;padding:10px 14px}
 .g-col+.g-col,.g-row+.g-col,.g-col+.g-row{border-top:.5px solid var(--sep)}
 .g-col label{font-size:13px;color:var(--muted)}
@@ -423,7 +432,7 @@ dialog.week{width:min(880px,calc(100vw - 24px))}
     </label>
     <div class="field">Type<div class="chips types" id="nType"></div></div>
     <div class="field">Start
-      <div class="row"><input type="datetime-local" id="nStart" style="flex:1"><button type="button" id="nNow">Now</button></div>
+      <div class="row"><span class="dt" id="nStartWrap"></span><button type="button" id="nNow">Now</button></div>
     </div>
     <div class="field">Duration
       <div class="chips dur" id="nDur"></div>
@@ -543,7 +552,7 @@ const EARLY_H = 46, SLOT_H = 32, LATE_H = 66, GUTTER = 58, MIN_LANE_W = 138;
 const MAIN_H = (DAY_END - DAY_START) / 30 * SLOT_H;
 const TOTAL_H = EARLY_H + MAIN_H + LATE_H;
 const TILT = 18, PERSP = 1500;               // keep in step with the CSS variables
-const SNAP = 15;                             // minutes
+const SNAP = 30;                             // minutes
 
 const $ = s => document.querySelector(s);
 const pad = n => String(n).padStart(2, "0");
@@ -560,6 +569,23 @@ function fmtWhen(ms){
   if (d === addDays(today, 1)) return "tomorrow " + fmtTime(ms);
   if (d === addDays(today, -1)) return "yesterday " + fmtTime(ms);
   return new Date(ms).toLocaleDateString("en-AU", { weekday: "short" }) + " " + fmtTime(ms);
+}
+// Date box + a time list in half-hour steps (the current time is added to the list if it's in between).
+const dateStr = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+function timeOptions(sel){
+  const list = []; for (let m = 0; m < 1440; m += 30) list.push(m);
+  if (sel % 30) { list.push(sel); list.sort((a, b) => a - b); }
+  return list.map(m => `<option value="${m}"${m === sel ? " selected" : ""}>${pad(Math.floor(m / 60))}:${pad(m % 60)}</option>`).join("");
+}
+function dtHTML(id, ms){
+  const d = new Date(ms), m = d.getHours() * 60 + d.getMinutes();
+  return `<input type="date" id="${id}D" value="${dateStr(ms)}" aria-label="Date"><select id="${id}T" aria-label="Time">${timeOptions(m)}</select>`;
+}
+function dtValue(id){
+  const dv = document.getElementById(id + "D")?.value, m = Number(document.getElementById(id + "T")?.value);
+  if (!dv || isNaN(m)) return null;
+  const [y, mo, da] = dv.split("-").map(Number);
+  const d = new Date(y, mo - 1, da); d.setHours(0, m, 0, 0); return d.getTime();
 }
 function toInput(ms){ const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
 function fromInput(v){ if (!v) return null; const t = new Date(v).getTime(); return isNaN(t) ? null : t; }
@@ -641,6 +667,21 @@ function imageToDataURL(file){
 function imageFromClipboard(e){
   for (const it of e.clipboardData?.items || []) if (it.kind === "file" && it.type.startsWith("image/")) return it.getAsFile();
   return null;
+}
+// Lightweight copies of schemes for the timeline blocks, so the page doesn't redraw huge images every minute.
+const schemeCache = new Map();
+function schemeURL(i){
+  const c = schemeCache.get(i.id);
+  if (c && c.src === i.scheme) return c.url;
+  if (c) URL.revokeObjectURL(c.url);
+  try {
+    const [head, b64] = i.scheme.split(","), mime = (head.match(/:(.*?);/) || [])[1] || "image/png";
+    const bin = atob(b64), arr = new Uint8Array(bin.length);
+    for (let k = 0; k < bin.length; k++) arr[k] = bin.charCodeAt(k);
+    const url = URL.createObjectURL(new Blob([arr], { type: mime }));
+    schemeCache.set(i.id, { src: i.scheme, url });
+    return url;
+  } catch { return i.scheme; }
 }
 function latestSchemeFor(code, exceptId){
   const c = code.trim().toLowerCase(); if (!c) return null;
@@ -725,6 +766,7 @@ function renderPlane(){
     if (h >= 42 && i.label) inner += `<span class="lbl">${esc(i.label)}</span>`;
     if (h >= 60) inner += `<span class="tm">${before ? fmtWhen(i.start) : fmtTime(i.start)} – ${after ? fmtWhen(i.end) : fmtTime(i.end)}</span>`;
     else if (h >= 48 && (before || after)) inner += `<span class="cont">${before ? "from " + fmtWhen(i.start) : "until " + fmtWhen(i.end)}</span>`;
+    if (i.type === "reaction" && i.scheme && h >= 84) inner += `<span class="blk-scheme"><img src="${schemeURL(i)}" alt="" draggable="false"></span>`;
     const badge = i.outcome === "ok" ? `<span class="badge ok" aria-label="Done">✓</span>` : i.outcome === "fail" ? `<span class="badge fail" aria-label="Not done">✗</span>` : "";
     const grip = after ? "" : `<span class="grip" aria-hidden="true"></span>`;
     const cls = ["blk", i.outcome === "fail" && "notdone", isRunning(i, now) && "running", i.id === selectedId && "sel", i.id === hoverId && "hover"].filter(Boolean).join(" ");
@@ -867,8 +909,8 @@ function renderEditor(i){
     <div class="scheme-drop ${i.scheme ? "has" : ""}" id="pScheme" tabindex="0">${i.scheme ? `<img src="${i.scheme}" alt="Reaction scheme for ${esc(i.code)}" data-zoom="${esc(i.code)}">` : "Copy from ChemDraw, then paste here (Ctrl/Cmd + V). You can also drop or choose an image."}</div>
     <div class="row" style="margin-top:8px"><button id="pSchemePick">Choose image</button>${i.scheme ? `<button id="pSchemeRemove" style="color:var(--fail)">Remove scheme</button>` : ""}</div>
     <div class="group">
-      <div class="g-row"><span>Start</span><input type="datetime-local" id="pStart" value="${toInput(i.start)}"></div>
-      <div class="g-row"><span>End</span><input type="datetime-local" id="pEnd" value="${toInput(i.end)}"></div>
+      <div class="g-row"><span>Start</span><span class="dt" id="pStart">${dtHTML("pStart", i.start)}</span></div>
+      <div class="g-row"><span>End</span><span class="dt" id="pEnd">${dtHTML("pEnd", i.end)}</span></div>
       <div class="g-row"><span>Length</span><input type="number" class="hours-in" id="pHours" min="0.25" step="0.25" inputmode="decimal" value="${+((i.end - i.start) / HOUR).toFixed(2)}"><span style="color:var(--muted)">hours</span></div>
       <div class="g-col"><div class="chips small" id="pQuick">
         <button data-a="-30">−30 min</button><button data-a="30">+30 min</button><button data-a="60">+1 h</button>
@@ -900,8 +942,8 @@ function renderEditor(i){
   $("#pHours").onchange = e => { const h = parseFloat(e.target.value); if (h > 0) { upd(x => x.end = x.start + Math.round(h * 60) * MIN, { now: true }); redo(); } };
   wireSeries(i);
   const pcy = $("#pCarry"); if (pcy) pcy.onclick = () => carryForward(i, targetDayFor(i));
-  $("#pStart").onchange = e => { const t = fromInput(e.target.value); if (t) { upd(x => { const d = x.end - x.start; x.start = t; x.end = t + d; }, { now: true }); redo(); } };
-  $("#pEnd").onchange = e => { const t = fromInput(e.target.value); if (t) { upd(x => x.end = t > x.start ? t : x.start + 30 * MIN, { now: true }); redo(); } };
+  $("#pStart").onchange = () => { const t = dtValue("pStart"); if (t) { upd(x => { const d = x.end - x.start; x.start = t; x.end = t + d; }, { now: true }); redo(); } };
+  $("#pEnd").onchange = () => { const t = dtValue("pEnd"); if (t) { upd(x => x.end = t > x.start ? t : x.start + 30 * MIN, { now: true }); redo(); } };
   $("#pQuick").onclick = e => {
     const b = e.target.closest("button"); if (!b) return; const a = b.dataset.a;
     upd(x => {
@@ -1369,7 +1411,7 @@ function openNew(startMs, from){
   chipRow($("#nType"), TYPE_CHIPS, nType);
   chipRow($("#nDur"), DURS, nDur);
   const start = startMs ?? roundTo(Date.now(), 5);
-  $("#nStart").value = toInput(start);
+  setNewStart(start);
   $("#nHoursRow").hidden = nDur !== "custom";
   $("#nHours").value = lsGet("rt-hours") || "";
   $("#nRepeat").checked = false; repeatNote();
@@ -1389,13 +1431,14 @@ $("#nDur").onclick = e => {
   chipRow($("#nDur"), DURS, nDur); $("#nHoursRow").hidden = nDur !== "custom";
   if (nDur === "custom") $("#nHours").focus();
 };
-$("#nNow").onclick = () => { $("#nStart").value = toInput(roundTo(Date.now(), 5)); repeatNote(); };
+function setNewStart(ms){ $("#nStartWrap").innerHTML = dtHTML("nStart", ms); }
+$("#nNow").onclick = () => { setNewStart(roundTo(Date.now(), 5)); repeatNote(); };
 function repeatNote(){
-  const t = fromInput($("#nStart").value);
+  const t = dtValue("nStart");
   $("#nRepeatNote").textContent = $("#nRepeat").checked && t ? `Every ${WEEKDAYS[new Date(t).getDay()]} at ${fmtTime(t)}, filled in ${SERIES_WEEKS} weeks ahead.` : "";
 }
 $("#nRepeat").onchange = repeatNote;
-$("#nStart").addEventListener("change", repeatNote);
+$("#nStartWrap").addEventListener("change", repeatNote);
 $("#nCode").addEventListener("change", () => {
   if (nScheme && !nSchemeAuto) return;
   const s = latestSchemeFor($("#nCode").value);
@@ -1409,7 +1452,7 @@ dlg.addEventListener("close", () => { carrySource = null; });
 $("#newForm").addEventListener("submit", e => {
   e.preventDefault();
   const code = $("#nCode").value.trim(); if (!code) return;
-  const start = fromInput($("#nStart").value) ?? Date.now();
+  const start = dtValue("nStart") ?? Date.now();
   let end;
   if (nDur === "custom") {
     const h = parseFloat($("#nHours").value);
